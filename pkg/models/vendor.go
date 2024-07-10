@@ -11,10 +11,11 @@ var db *gorm.DB
 
 type Vendor struct {
 	gorm.Model
-	Name              string         `gorm:"" json:"name"`
+	ID                uint           `gorm:"primaryKey"`
+	Name              string         `json:"name"`
 	Price             int            `json:"price"`
 	TravelingDistance int            `json:"travelingdistance"`
-	Availability      Availability   `json:"availability"`
+	Availability      Availability   `json:"availability" gorm:"foreignKey:VendorID"`
 	BookingRequest    BookingRequest `json:"bookingrequest"`
 	Bookings          []Booking      `json:"bookings"`
 }
@@ -22,7 +23,7 @@ type Vendor struct {
 func init() {
 	config.Connect()
 	db = config.GetDB()
-	db.AutoMigrate(&Vendor{})
+	db.AutoMigrate(&Vendor{}, &Availability{}, &AvailabilityEntry{})
 }
 
 func (v *Vendor) CreateVendor() *Vendor {
@@ -50,7 +51,11 @@ func DeleteVendorById(Id int64) Vendor {
 
 func GetAllAvailibleVendors(start time.Time, end time.Time) []Vendor {
 	var availbleVendors []Vendor
-	err := db.Preload("Availability", "day = ? AND start_time <= ? AND end_time >= ?", start.Weekday(), start.Hour(), end.Hour()).
+	// Join the tables and apply the conditions
+	err := db.Joins("JOIN availabilities ON availabilities.vendor_id = vendors.id").
+		Joins("JOIN availability_entries ON availability_entries.availability_id = availabilities.id").
+		Where("availability_entries.day = ? AND availability_entries.start_time <= ? AND availability_entries.end_time >= ?", start.Weekday(), start.Hour(), end.Hour()).
+		Preload("Availability.AvailabilityEntries").
 		Find(&availbleVendors).Error
 	if err != nil {
 		return nil

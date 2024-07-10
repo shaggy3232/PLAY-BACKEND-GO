@@ -8,10 +8,12 @@ import (
 
 type Availability struct {
 	gorm.Model
-	Entries []AvailabilityEntry `json:"entries"`
+	ID      uint                `gorm:"primaryKey"`
+	Entries []AvailabilityEntry `json:"entries" gorm:"foreignKey:AvailabilityID"`
 }
 
 type AvailabilityEntry struct {
+	ID    uint         `gorm:"primaryKey"`
 	Day   time.Weekday `json:"day"`
 	Start int          `json:"start"`
 	End   int          `json:"end"`
