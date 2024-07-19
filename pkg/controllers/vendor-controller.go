@@ -19,7 +19,6 @@ func GetVendor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
-
 }
 
 func GetVendorById(w http.ResponseWriter, r *http.Request) {
@@ -49,6 +48,7 @@ func DeleteVendor(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	vendorId := vars["vendorId"]
 	ID, err := strconv.ParseInt(vendorId, 0, 0)
+	fmt.Println(ID)
 	if err != nil {
 		fmt.Println("error while parsing")
 	}
@@ -68,24 +68,26 @@ func UpdateVendor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error while parsing")
 	}
-	vendorDetails, db := models.GetVendorById(ID)
 
-	if updateVendor.Name != "" {
-		vendorDetails.Name = updateVendor.Name
-	}
+	//update vendor function
+	vendorDetails, _ := models.GetVendorById(ID)
 
-	if updateVendor.Price != vendorDetails.Price {
-		vendorDetails.Price = updateVendor.Price
-	}
-
-	if updateVendor.TravelingDistance != vendorDetails.TravelingDistance {
-		vendorDetails.TravelingDistance = updateVendor.TravelingDistance
-	}
-
-	db.Save(&vendorDetails)
 	res, _ := json.Marshal(vendorDetails)
 	w.Header().Set("Content-Typer", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 
+}
+
+func GetAllAvailibleVendors(w http.ResponseWriter, r *http.Request) {
+	// vars := mux.Vars(r)
+	day := r.URL.Query().Get("day")
+	start := r.URL.Query().Get("start")
+	end := r.URL.Query().Get("end")
+	fmt.Println(day, end, start)
+	availableVendors := models.GetAllAvailibleVendors(day, start, end)
+	res, _ := json.Marshal(availableVendors)
+	w.Header().Set("Content-Typer", "pkglication/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
 }
