@@ -28,7 +28,7 @@ func GetVendorById(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("ERROR WHILE PARSING ")
 	}
-	vendorDetails, _ := models.GetVendorById(ID)
+	vendorDetails := models.GetVendorById(ID)
 	res, _ := json.Marshal(vendorDetails)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
@@ -52,8 +52,9 @@ func DeleteVendor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error while parsing")
 	}
-	vendor := models.DeleteVendorById(ID)
-	res, _ := json.Marshal(vendor)
+	vendor := models.GetVendorById(ID)
+	DeletedVendor := models.DeleteVendorById(vendor)
+	res, _ := json.Marshal(DeletedVendor)
 	w.Header().Set("Content-Type", "pkglication.json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
@@ -70,7 +71,7 @@ func UpdateVendor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//update vendor function
-	vendorDetails, _ := models.GetVendorById(ID)
+	vendorDetails := models.GetVendorById(ID)
 
 	res, _ := json.Marshal(vendorDetails)
 	w.Header().Set("Content-Typer", "pkglication/json")
@@ -90,4 +91,44 @@ func GetAllAvailibleVendors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Typer", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
+}
+func GetAllAvailabilityEntries(w http.ResponseWriter, r *http.Request) {
+	availabilities, _ := models.GetAllAvailabilityEntries()
+	res, _ := json.Marshal(availabilities)
+	w.Header().Set("Content-Typer", "pkglication/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
+func RequestBooking(w http.ResponseWriter, r *http.Request) {
+	user := r.URL.Query().Get("user")
+	dateString := r.URL.Query().Get("day")
+	start := r.URL.Query().Get("start")
+	end := r.URL.Query().Get("end")
+	vendorID := r.URL.Query().Get("vendorID")
+	price := r.URL.Query().Get("price")
+	location := r.URL.Query().Get("location")
+	vID, er := strconv.Atoi(vendorID)
+	if er != nil {
+		fmt.Println(er)
+	}
+	end_time, err := strconv.Atoi(end)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	start_time, err := strconv.Atoi(start)
+	if err != nil {
+		fmt.Print(err)
+	}
+	cost, err := strconv.Atoi(price)
+	if err != nil {
+		fmt.Print(err)
+	}
+	booking := models.requestBooking(start_time, end_time, dateString, vID, user, location, cost)
+	res, _ := json.Marshal(booking)
+	w.Header().Set("Content-Typer", "pkglication/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+
 }

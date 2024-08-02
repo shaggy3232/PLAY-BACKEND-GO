@@ -12,4 +12,5 @@ var RegisterVendorRoutes = func(router *mux.Router) {
 	router.HandleFunc("/vendor/{vendorId}", controllers.UpdateVendor).Methods("PUT")
 	router.HandleFunc("/vendor", controllers.GetVendor).Methods("GET")
 	router.HandleFunc("/vendor/getavailabletime/", controllers.GetAllAvailibleVendors).Methods("GET")
+	router.HandleFunc("/availbilityentries", controllers.GetAllAvailabilityEntries).Methods("GET")
 }
