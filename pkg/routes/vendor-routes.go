@@ -13,4 +13,6 @@ var RegisterVendorRoutes = func(router *mux.Router) {
 	router.HandleFunc("/vendor", controllers.GetVendor).Methods("GET")
 	router.HandleFunc("/vendor/getavailabletime/", controllers.GetAllAvailibleVendors).Methods("GET")
 	router.HandleFunc("/availbilityentries", controllers.GetAllAvailabilityEntries).Methods("GET")
+	router.HandleFunc("/makebookingrequest", controllers.RequestBooking).Methods("POST")
+	router.HandleFunc("/bookings", controllers.GetAllBookings).Methods("GET")
 }

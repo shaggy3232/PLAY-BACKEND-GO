@@ -100,9 +100,17 @@ func GetAllAvailabilityEntries(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func GetAllBookings(w http.ResponseWriter, r *http.Request) {
+	bookings := models.GetAllBookings()
+	res, _ := json.Marshal(bookings)
+	w.Header().Set("Content-Typer", "pkglication/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
 func RequestBooking(w http.ResponseWriter, r *http.Request) {
 	user := r.URL.Query().Get("user")
-	dateString := r.URL.Query().Get("day")
+	dateString := r.URL.Query().Get("date")
 	start := r.URL.Query().Get("start")
 	end := r.URL.Query().Get("end")
 	vendorID := r.URL.Query().Get("vendorID")
@@ -125,7 +133,7 @@ func RequestBooking(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Print(err)
 	}
-	booking := models.requestBooking(start_time, end_time, dateString, vID, user, location, cost)
+	booking := models.RequestBooking(start_time, end_time, dateString, vID, user, location, cost)
 	res, _ := json.Marshal(booking)
 	w.Header().Set("Content-Typer", "pkglication/json")
 	w.WriteHeader(http.StatusOK)

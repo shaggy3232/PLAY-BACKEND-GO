@@ -130,7 +130,7 @@ func (v *Vendor) CreateVendor() *Vendor {
 	if err = tx.Commit(); err != nil {
 		fmt.Print(err)
 	}
-	var bookings []Booking
+	bookings := make([]Booking, 0)
 	v.Bookings = bookings
 
 	return v
@@ -138,10 +138,6 @@ func (v *Vendor) CreateVendor() *Vendor {
 
 func GetAllVendors() []Vendor {
 	var vendors []Vendor
-	availabilities, err := GetAllAvailabilities()
-	if err != nil {
-		fmt.Print(err)
-	}
 
 	query := "SELECT * from vendors"
 	rows, err := db.Query(query)
@@ -155,12 +151,13 @@ func GetAllVendors() []Vendor {
 			fmt.Print(err)
 			return nil
 		}
-
-		for _, a := range availabilities {
-			if a.VendorID == vendor.ID {
-				vendor.Availability = a
-			}
+		bookings := GetAllBookingsGivenVendorID(int(vendor.ID))
+		vendor.Bookings = bookings
+		availability, err := GetAllAvailabilitiesWithVendorID(int(vendor.ID))
+		if err != nil {
+			fmt.Print(err)
 		}
+		vendor.Availability = availability
 		vendors = append(vendors, vendor)
 	}
 
@@ -177,8 +174,9 @@ func GetVendorById(Id int64) Vendor {
 	if err != nil {
 		fmt.Print(err)
 	}
-
+	bookings := GetAllBookingsGivenVendorID(int(vendor.ID))
 	vendor.Availability = availability
+	vendor.Bookings = bookings
 	return vendor
 
 }
@@ -232,7 +230,7 @@ func VendorIsAvailble(start int, end int, dateString string, vendor Vendor) bool
 	}
 	return noBookings && inAvailability
 }
-func requestBooking(start int, end int, dateString string, vendorID int, user string, location string, Price int) Booking {
+func RequestBooking(start int, end int, dateString string, vendorID int, user string, location string, Price int) Booking {
 	var booking Booking
 	booking.VendorID = uint(vendorID)
 	booking.User = user
@@ -342,4 +340,40 @@ func GetAllEntriesGivenAvailabilityID(ID int) []AvailabilityEntry {
 		availabilities = append(availabilities, entry)
 	}
 	return availabilities
+}
+
+func GetAllBookingsGivenVendorID(ID int) []Booking {
+	var bookings []Booking
+
+	query := "SELECT * FROM bookings WHERE vendor_id = ?"
+	rows, err := db.Query(query, ID)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	for rows.Next() {
+		var booking Booking
+		if err := rows.Scan(&booking.ID, &booking.VendorID, &booking.User, &booking.Date, &booking.Start, &booking.End, &booking.Price, &booking.Location, &booking.Accepted); err != nil {
+			fmt.Print(err)
+		}
+		bookings = append(bookings, booking)
+	}
+	return bookings
+}
+
+func GetAllBookings() []Booking {
+	var bookings []Booking
+	query := "SELECT * FROM bookings"
+	rows, err := db.Query(query)
+	if err != nil {
+		fmt.Print(err)
+	}
+	for rows.Next() {
+		var booking Booking
+		if err := rows.Scan(&booking.ID, &booking.VendorID, &booking.User, &booking.Date, &booking.Start, &booking.End, &booking.Price, &booking.Location, &booking.Accepted); err != nil {
+			fmt.Print(err)
+		}
+		bookings = append(bookings, booking)
+	}
+	return bookings
 }
