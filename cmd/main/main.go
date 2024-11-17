@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/routes"
 )
 
@@ -23,23 +25,30 @@ func main() {
 	// signal handlers
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 
+	// create the application and start it up
 	app := App{}
 	app.Run()
 
 	<-ctx.Done()
 	cancel()
 
-	// create a context with timeout for shutting down
-	ctx, cancel = context.WithTimeout(context.Background(), time.Duration(10*time.Second))
-	defer cancel()
-
-	app.API.Shutdown(ctx)
-
-	log.Print("Application shut down")
+	// shutdown the applicaiton
+	app.Stop()
 }
 
 // Run starts the application components
 func (a *App) Run() {
+	// setup logging
+	// TODO: add log_level as config var
+	logLevel := zerolog.DebugLevel
+	zerolog.TimeFieldFormat = time.RFC3339Nano
+	log := zerolog.New(os.Stderr).
+		Level(logLevel).
+		With().
+		Timestamp().
+		Logger()
+	zerolog.DefaultContextLogger = &log
+
 	r := mux.NewRouter()
 	routes.RegisterVendorRoutes(r)
 	http.Handle("/", r)
@@ -53,10 +62,23 @@ func (a *App) Run() {
 		err := a.API.ListenAndServe()
 		if err != nil {
 			if !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal(err, "failed to start http server")
+				log.Fatal().
+					Err(err).
+					Msg("Failed to start http server")
 			}
 		}
 	}()
 
-	log.Print("Application running")
+	log.Info().Msg("Application running")
+}
+
+// Stop gracefully shutsdown the application
+func (a *App) Stop() {
+	// create a context with timeout for shutting down
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
+	defer cancel()
+
+	a.API.Shutdown(ctx)
+
+	log.Info().Msg("Application shut down")
 }
