@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	playhttp "github.com/shaggy3232/PLAY-BACKEND-GO/pkg/http"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/models"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/utils"
 )
@@ -15,10 +15,8 @@ var NewVendor models.Vendor
 
 func GetVendor(w http.ResponseWriter, r *http.Request) {
 	newVendor := models.GetAllVendors()
-	res, _ := json.Marshal(newVendor)
-	w.Header().Set("Content-Type", "pkglication/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+
+	playhttp.Encode(w, r, http.StatusOK, &newVendor)
 }
 
 func GetVendorById(w http.ResponseWriter, r *http.Request) {
@@ -29,19 +27,16 @@ func GetVendorById(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("ERROR WHILE PARSING ")
 	}
 	vendorDetails := models.GetVendorById(ID)
-	res, _ := json.Marshal(vendorDetails)
-	w.Header().Set("Content-Type", "pkglication/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+
+	playhttp.Encode(w, r, http.StatusOK, &vendorDetails)
 }
 
 func CreateVendor(w http.ResponseWriter, r *http.Request) {
 	CreateVendor := &models.Vendor{}
 	utils.ParseBody(r, CreateVendor)
 	v := CreateVendor.CreateVendor()
-	res, _ := json.Marshal(v)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+
+	playhttp.Encode(w, r, http.StatusCreated, &v)
 }
 
 func DeleteVendor(w http.ResponseWriter, r *http.Request) {
@@ -54,10 +49,8 @@ func DeleteVendor(w http.ResponseWriter, r *http.Request) {
 	}
 	vendor := models.GetVendorById(ID)
 	DeletedVendor := models.DeleteVendorById(vendor)
-	res, _ := json.Marshal(DeletedVendor)
-	w.Header().Set("Content-Type", "pkglication.json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+
+	playhttp.Encode(w, r, http.StatusOK, &DeletedVendor)
 }
 
 func UpdateVendor(w http.ResponseWriter, r *http.Request) {
@@ -73,11 +66,7 @@ func UpdateVendor(w http.ResponseWriter, r *http.Request) {
 	//update vendor function
 	vendorDetails := models.GetVendorById(ID)
 
-	res, _ := json.Marshal(vendorDetails)
-	w.Header().Set("Content-Typer", "pkglication/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-
+	playhttp.Encode(w, r, http.StatusOK, &vendorDetails)
 }
 
 func GetAllAvailibleVendors(w http.ResponseWriter, r *http.Request) {
@@ -87,25 +76,19 @@ func GetAllAvailibleVendors(w http.ResponseWriter, r *http.Request) {
 	end := r.URL.Query().Get("end")
 	fmt.Println(day, end, start)
 	availableVendors := models.GetAllAvailibleVendors(day, start, end)
-	res, _ := json.Marshal(availableVendors)
-	w.Header().Set("Content-Typer", "pkglication/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+
+	playhttp.Encode(w, r, http.StatusOK, &availableVendors)
 }
 func GetAllAvailabilityEntries(w http.ResponseWriter, r *http.Request) {
 	availabilities, _ := models.GetAllAvailabilityEntries()
-	res, _ := json.Marshal(availabilities)
-	w.Header().Set("Content-Typer", "pkglication/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+
+	playhttp.Encode(w, r, http.StatusOK, &availabilities)
 }
 
 func GetAllBookings(w http.ResponseWriter, r *http.Request) {
 	bookings := models.GetAllBookings()
-	res, _ := json.Marshal(bookings)
-	w.Header().Set("Content-Typer", "pkglication/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+
+	playhttp.Encode(w, r, http.StatusOK, &bookings)
 }
 
 func RequestBooking(w http.ResponseWriter, r *http.Request) {
@@ -134,9 +117,6 @@ func RequestBooking(w http.ResponseWriter, r *http.Request) {
 		fmt.Print(err)
 	}
 	booking := models.RequestBooking(start_time, end_time, dateString, vID, user, location, cost)
-	res, _ := json.Marshal(booking)
-	w.Header().Set("Content-Typer", "pkglication/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
 
+	playhttp.Encode(w, r, http.StatusCreated, &booking)
 }
