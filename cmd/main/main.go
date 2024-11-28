@@ -13,6 +13,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/http/middleware"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/routes"
 )
 
@@ -50,6 +51,11 @@ func (a *App) Run() {
 	zerolog.DefaultContextLogger = &log
 
 	r := mux.NewRouter()
+
+	// middleware
+	r.Use(middleware.NewPanicMiddleware())
+	r.Use(middleware.NewLoggingMiddleware())
+
 	routes.RegisterVendorRoutes(r)
 	http.Handle("/", r)
 
