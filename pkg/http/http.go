@@ -17,4 +17,3 @@ func Encode[T any](w http.ResponseWriter, r *http.Request, status int, v *T) err
 
 	return nil
 }
-
