@@ -6,12 +6,21 @@ import (
 
 	playhttp "github.com/shaggy3232/PLAY-BACKEND-GO/pkg/http"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/models"
-	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/repositories"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/utils"
 )
 
+type UserStore interface {
+	// define crud functions
+	CreateUser(ctx context.Context, user models.User) (*models.User, error)
+	GetUsers(ctx context.Context) ([]*models.User, error)
+	GetUserById(ctx context.Context, id int) (*models.User, error)
+	// TODO: GetFilteredUser()
+	UpdateUser(ctx context.Context, id int, user models.User) (*models.User, error)
+	DeleteUser(ctx context.Context, id int) (int, error)
+}
+
 type UserController struct {
-	Repo repositories.UserRepository
+	store UserStore
 }
 
 //handle http request using the repository that is passed in to the controller
@@ -20,7 +29,7 @@ func (c *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	potentialUser := &models.User{}
 	ctx := context.TODO()
 	utils.ParseBody(r, potentialUser)
-	newUser, err := c.Repo.CreateUser(ctx, *potentialUser)
+	newUser, err := c.store.CreateUser(ctx, *potentialUser)
 	if err != nil {
 		println(err)
 	}
