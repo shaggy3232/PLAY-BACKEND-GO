@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 
-	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/models"
+	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
 type UserRepository interface {

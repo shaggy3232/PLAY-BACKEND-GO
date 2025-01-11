@@ -4,9 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	playhttp "github.com/shaggy3232/PLAY-BACKEND-GO/pkg/http"
-	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/models"
-	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/utils"
+	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
 type UserStore interface {
@@ -25,25 +23,21 @@ type UserController struct {
 
 //handle http request using the repository that is passed in to the controller
 
-func (c *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
-	potentialUser := &models.User{}
-	ctx := context.TODO()
-	utils.ParseBody(r, potentialUser)
-	newUser, err := c.store.CreateUser(ctx, *potentialUser)
-	if err != nil {
-		println(err)
-	}
-
-	playhttp.Encode(w, r, http.StatusOK, newUser)
-
-}
-
 func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (c *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func (c *UserController) CreateUser(ctx context.Context, newUser *models.User) (*models.User, error) {
+	createdUser, err := c.store.CreateUser(ctx, *newUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdUser, nil
 }
 
 func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {

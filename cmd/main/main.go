@@ -9,17 +9,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/mux"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/controllers"
+	playhttp "github.com/shaggy3232/PLAY-BACKEND-GO/internal/http"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/http/middleware"
-	"github.com/shaggy3232/PLAY-BACKEND-GO/pkg/routes"
 )
 
 // App contains all components for the application
 type App struct {
-	API *http.Server
+	API *playhttp.APIServer
 }
 
 func main() {
@@ -33,7 +32,7 @@ func main() {
 	<-ctx.Done()
 	cancel()
 
-	// shutdown the applicaiton
+	// shutdown the application
 	app.Stop()
 }
 
@@ -50,22 +49,17 @@ func (a *App) Run() {
 		Logger()
 	zerolog.DefaultContextLogger = &log
 
-	r := mux.NewRouter()
+	userController := controllers.UserController{}
 
-	// middleware
-	r.Use(middleware.NewPanicMiddleware())
-	r.Use(middleware.NewLoggingMiddleware())
+	api := playhttp.NewAPIServer(
+		playhttp.WithPort(8080),
+		playhttp.WithUserController(&userController),
+	)
 
-	routes.RegisterVendorRoutes(r)
-	http.Handle("/", r)
-
-	a.API = &http.Server{
-		Addr:    ":8080",
-		Handler: r,
-	}
+	a.API = api
 
 	go func() {
-		err := a.API.ListenAndServe()
+		err := a.API.Server.ListenAndServe()
 		if err != nil {
 			if !errors.Is(err, http.ErrServerClosed) {
 				log.Fatal().
@@ -78,13 +72,13 @@ func (a *App) Run() {
 	log.Info().Msg("Application running")
 }
 
-// Stop gracefully shutsdown the application
+// Stop gracefully shuts down the application
 func (a *App) Stop() {
 	// create a context with timeout for shutting down
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
 	defer cancel()
 
-	a.API.Shutdown(ctx)
+	a.API.Server.Shutdown(ctx)
 
 	log.Info().Msg("Application shut down")
 }
