@@ -2,32 +2,34 @@ package controllers
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
+	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/repositories"
 )
 
-type UserStore interface {
-	// define crud functions
-	CreateUser(ctx context.Context, user models.User) (*models.User, error)
-	GetUsers(ctx context.Context) ([]*models.User, error)
-	GetUserById(ctx context.Context, id int) (*models.User, error)
-	// TODO: GetFilteredUser()
-	UpdateUser(ctx context.Context, id int, user models.User) (*models.User, error)
-	DeleteUser(ctx context.Context, id int) (int, error)
-}
-
 type UserController struct {
-	store UserStore
+	store repositories.UserRepository
 }
 
-//handle http request using the repository that is passed in to the controller
+func (c *UserController) GetUserById(ctx context.Context, id int64) (*models.User, error) {
+	user, err := c.store.GetUserById(ctx, id)
 
-func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 
 }
 
-func (c *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) GetUsers(ctx context.Context) (*models.UserList, error) {
+	users, err := c.store.GetUsers(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 
 }
 
@@ -40,10 +42,11 @@ func (c *UserController) CreateUser(ctx context.Context, newUser *models.User) (
 	return createdUser, nil
 }
 
-func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) DeleteUser(ctx context.Context, id int) (*models.User, error) {
+	return nil, nil
 
 }
 
-func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
-
+func (c *UserController) UpdateUser(ctx context.Context, newUser models.User) (*models.User, error) {
+	return nil, nil
 }

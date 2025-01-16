@@ -8,3 +8,7 @@ type User struct {
 	Password    string `json:"password"`
 	PhoneNumber string `json:"phone_number"`
 }
+
+type UserList struct {
+	Users []*User
+}
