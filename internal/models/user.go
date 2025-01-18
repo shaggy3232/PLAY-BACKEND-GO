@@ -2,7 +2,7 @@ package models
 
 type User struct {
 	///db schema
-	ID          uint   `json:"id"`
+	ID          string `json:"id"` // string representation of UUID
 	Name        string `json:"name"`
 	Email       string `json:"email"`
 	Password    string `json:"password"`

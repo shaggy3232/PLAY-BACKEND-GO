@@ -3,56 +3,55 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"log"
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
-type PostgressStore struct {
+type Client struct {
 	db *sql.DB
 }
 
-func NewPostgressStore() (*PostgressStore, error) {
+func New() (*Client, error) {
 	connStr := "user=postgres dbname=postgres password=postgres123 sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal(err)
+    return nil, err
 	}
 
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
-	return &PostgressStore{
+	return &Client{
 		db: db,
 	}, nil
 }
 
-func (s *PostgressStore) Init() {
-	s.CreateUserTable()
+func (c *Client) Init() {
+	c.CreateUserTable()
 }
 
-func (s *PostgressStore) CreateUserTable() string {
+func (c *Client) CreateUserTable() string {
 	return "true"
 }
 
-func (s *PostgressStore) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
+func (c *Client) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
 	return nil, nil
 }
 
-func (s *PostgressStore) GetUsers(ctx context.Context) (*models.UserList, error) {
+func (c *Client) GetUsers(ctx context.Context) (*models.UserList, error) {
 	return nil, nil
 
 }
 
-func (s *PostgressStore) GetUserById(ctx context.Context, id int64) (*models.User, error) {
+func (c *Client) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	return nil, nil
 
 }
-func (s *PostgressStore) UpdateUser(ctx context.Context, user models.User) (*models.User, error) {
+func (c *Client) UpdateUser(ctx context.Context, user models.User) (*models.User, error) {
 	return nil, nil
 
 }
-func (s *PostgressStore) DeleteUser(ctx context.Context, id int) (int, error) {
+func (c *Client) DeleteUser(ctx context.Context, id string) (int, error) {
 	return 0, nil
 
 }

@@ -4,14 +4,23 @@ import (
 	"context"
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
-	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/repositories"
 )
 
-type UserController struct {
-	store repositories.UserRepository
+type UserRepository interface {
+	// define crud functions
+	CreateUser(ctx context.Context, user models.User) (*models.User, error)
+	GetUsers(ctx context.Context) (*models.UserList, error)
+	GetUserById(ctx context.Context, id string) (*models.User, error)
+	// TODO: GetFilteredUser()
+	UpdateUser(ctx context.Context, user models.User) (*models.User, error)
+	DeleteUser(ctx context.Context, id string) (int, error)
 }
 
-func (c *UserController) GetUserById(ctx context.Context, id int64) (*models.User, error) {
+type UserController struct {
+	store UserRepository
+}
+
+func (c *UserController) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	user, err := c.store.GetUserById(ctx, id)
 
 	if err != nil {
@@ -42,7 +51,7 @@ func (c *UserController) CreateUser(ctx context.Context, newUser *models.User) (
 	return createdUser, nil
 }
 
-func (c *UserController) DeleteUser(ctx context.Context, id int) (*models.User, error) {
+func (c *UserController) DeleteUser(ctx context.Context, id string) (*models.User, error) {
 	return nil, nil
 
 }
