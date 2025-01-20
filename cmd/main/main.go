@@ -11,6 +11,7 @@ import (
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/controllers"
 	playhttp "github.com/shaggy3232/PLAY-BACKEND-GO/internal/http"
+	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/postgres"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -19,6 +20,7 @@ import (
 // App contains all components for the application
 type App struct {
 	API *playhttp.APIServer
+	DB  *postgres.Client
 }
 
 func main() {
@@ -27,7 +29,7 @@ func main() {
 
 	// create the application and start it up
 	app := App{}
-	app.Run()
+	app.Run(ctx)
 
 	<-ctx.Done()
 	cancel()
@@ -37,7 +39,7 @@ func main() {
 }
 
 // Run starts the application components
-func (a *App) Run() {
+func (a *App) Run(ctx context.Context) {
 	// setup logging
 	// TODO: add log_level as config var
 	logLevel := zerolog.DebugLevel
@@ -49,7 +51,21 @@ func (a *App) Run() {
 		Logger()
 	zerolog.DefaultContextLogger = &log
 
-	userController := controllers.UserController{}
+	// TODO: Make config struct with env variable parsing
+	db, err := postgres.New(
+		ctx,
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_NAME"),
+	)
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Failed to connect to postgres DB")
+	}
+
+	userController := controllers.UserController{Store: db}
 
 	api := playhttp.NewAPIServer(
 		playhttp.WithPort(8080),
@@ -57,6 +73,7 @@ func (a *App) Run() {
 	)
 
 	a.API = api
+	a.DB = db
 
 	go func() {
 		err := a.API.Server.ListenAndServe()
@@ -78,7 +95,8 @@ func (a *App) Stop() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
 	defer cancel()
 
-	a.API.Server.Shutdown(ctx)
+	a.API.Shutdown(ctx)
+	a.DB.Shutdown()
 
 	log.Info().Msg("Application shut down")
 }

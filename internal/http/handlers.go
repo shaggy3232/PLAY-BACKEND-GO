@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
@@ -34,7 +33,7 @@ func (api *APIServer) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (api *APIServer) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
+func (api *APIServer) HandleListUsers(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
 
 	users, err := api.UserController.GetUsers(r.Context())
@@ -59,56 +58,41 @@ func (api *APIServer) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 func (api *APIServer) HandleGetUserById(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
 	vars := mux.Vars(r)
-	userId := vars["user_ID"]
-	ID, err := strconv.ParseInt(userId, 0, 0)
-
-	if err != nil {
+	userId, ok := vars["userID"]
+	if !ok {
 		log.Error().
-			Err(err).
 			Msg("failed to get id from request")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing user id in request"})
 	}
 
-	user, err := api.UserController.GetUserById(r.Context(), ID)
+	user, err := api.UserController.GetUserById(r.Context(), userId)
+	if err != nil {
+		// TODO: distinguish between missing users and actual errors
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get user"})
+	}
 
 	if err := encode(w, r, http.StatusOK, user); err != nil {
 		log.Error().
 			Err(err).
 			Msg("failed to encode GetUsers json response")
 	}
-
-}
-
-func (api *APIServer) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
-	log := zerolog.Ctx(r.Context())
-
-	potentialUser, err := decode[models.User](r)
-	if err != nil {
-		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid user schema"})
-		return
-	}
-
-	updatedUser, err := api.UserController.UpdateUser(r.Context(), potentialUser)
-
-	if err := encode(w, r, http.StatusOK, updatedUser); err != nil {
-		log.Error().
-			Err(err).
-			Msg("failed to encode GetUsers json response")
-	}
-
 }
 
 func (api *APIServer) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
 	vars := mux.Vars(r)
-	userId := vars["user_ID"]
-	ID, err := strconv.ParseInt(userId, 0, 0)
-	if err != nil {
+	userId, ok := vars["userID"]
+	if !ok {
 		log.Error().
-			Err(err).
 			Msg("failed to get id from request")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing user id in request"})
 	}
 
-	deletedUser, err := api.UserController.DeleteUser(r.Context(), int(ID))
+	deletedUser, err := api.UserController.DeleteUser(r.Context(), userId)
+	if err != nil {
+		// TODO: distinguish between missing users and actual errors
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get user"})
+	}
 
 	if err := encode(w, r, http.StatusOK, deletedUser); err != nil {
 		log.Error().

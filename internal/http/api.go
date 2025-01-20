@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -18,6 +19,10 @@ type APIServer struct {
 
 // APIServerOption defines a function that modifies the Server.
 type APIServerOption func(*APIServer)
+
+type APIError struct {
+	Message string `json:"message"`
+}
 
 // NewAPIServer setups a the API + Routes
 func NewAPIServer(options ...APIServerOption) *APIServer {
@@ -38,10 +43,9 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 
 	// routes
 	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST")
-	r.HandleFunc("/users", api.HandleGetUsers).Methods("GET")
-	r.HandleFunc("/users/userID", api.HandleGetUserById).Methods("GET")
+	r.HandleFunc("/users", api.HandleListUsers).Methods("GET")
+	r.HandleFunc("/users/{userID}", api.HandleGetUserById).Methods("GET")
 	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE")
-	r.HandleFunc("/users/{userID}", api.HandleUpdateUser).Methods("PUT")
 
 	http.Handle("/", r)
 
@@ -65,6 +69,6 @@ func WithUserController(userController *controllers.UserController) APIServerOpt
 	}
 }
 
-type APIError struct {
-	Message string `json:"message"`
+func (a *APIServer) Shutdown(ctx context.Context) error {
+	return a.Server.Shutdown(ctx)
 }

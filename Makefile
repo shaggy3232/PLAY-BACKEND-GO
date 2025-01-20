@@ -16,7 +16,7 @@ run:
 # build images and run all services in docker
 .PHONY: compose
 compose:
-	docker compose up --build -d
+	docker compose up --build
 
 # stop running docker containers
 .PHONY: clean

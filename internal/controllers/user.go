@@ -12,16 +12,15 @@ type UserRepository interface {
 	GetUsers(ctx context.Context) (*models.UserList, error)
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	// TODO: GetFilteredUser()
-	UpdateUser(ctx context.Context, user models.User) (*models.User, error)
 	DeleteUser(ctx context.Context, id string) (int, error)
 }
 
 type UserController struct {
-	store UserRepository
+	Store UserRepository
 }
 
 func (c *UserController) GetUserById(ctx context.Context, id string) (*models.User, error) {
-	user, err := c.store.GetUserById(ctx, id)
+	user, err := c.Store.GetUserById(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -32,7 +31,7 @@ func (c *UserController) GetUserById(ctx context.Context, id string) (*models.Us
 }
 
 func (c *UserController) GetUsers(ctx context.Context) (*models.UserList, error) {
-	users, err := c.store.GetUsers(ctx)
+	users, err := c.Store.GetUsers(ctx)
 
 	if err != nil {
 		return nil, err
@@ -43,7 +42,7 @@ func (c *UserController) GetUsers(ctx context.Context) (*models.UserList, error)
 }
 
 func (c *UserController) CreateUser(ctx context.Context, newUser *models.User) (*models.User, error) {
-	createdUser, err := c.store.CreateUser(ctx, *newUser)
+	createdUser, err := c.Store.CreateUser(ctx, *newUser)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +53,4 @@ func (c *UserController) CreateUser(ctx context.Context, newUser *models.User) (
 func (c *UserController) DeleteUser(ctx context.Context, id string) (*models.User, error) {
 	return nil, nil
 
-}
-
-func (c *UserController) UpdateUser(ctx context.Context, newUser models.User) (*models.User, error) {
-	return nil, nil
 }

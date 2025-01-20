@@ -1,22 +1,24 @@
 services:
   db:
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      start_interval: 10s
-      start_period: 40s
-      timeout: 20s
-      retries: 10
     image: postgres:latest
     platform: linux/amd64
-    container_name: PostgresCont
+    container_name: postgresdb
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres123
       - POSTGRES_NAME=postgres
-    expose:
-      - "5432"
+    ports:
+      - "5432:5432"  # Map host port 5432 to container port 5432
+    networks:
+      - play
     volumes:
-      - postgres_db:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres || exit 1"]
+      interval: 10s  # Check every 10 seconds
+      timeout: 5s    # Timeout after 5 seconds
+      retries: 3     # Mark as unhealthy after 3 failures
+      start_period: 30s  # Wait 30 seconds before starting health checks
 
 
   playgobackend:
@@ -26,18 +28,18 @@ services:
     container_name: playgobackend
     ports:
       - "8080:8080"
+    networks:
+      - play
     depends_on:
       db:
         condition: service_healthy
-
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: user
-      DB_PASSWORD: user_password
-      DB_NAME: dbname
+      DB_HOST: "db:5432"
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: postgres
 
 volumes:
-  postgres_db:
+  pgdata:
 networks:
-  default:
+  play:
