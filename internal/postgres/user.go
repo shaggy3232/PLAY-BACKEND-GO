@@ -10,7 +10,7 @@ func (c *Client) CreateUser(ctx context.Context, user models.User) (*models.User
 	return nil, nil
 }
 
-func (c *Client) GetUsers(ctx context.Context) (*models.UserList, error) {
+func (c *Client) GetUsers(ctx context.Context) ([]models.User, error) {
 	return nil, nil
 
 }

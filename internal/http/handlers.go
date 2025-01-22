@@ -47,7 +47,7 @@ func (api *APIServer) HandleListUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := encode(w, r, http.StatusOK, users); err != nil {
+	if err := encode[[]models.User](w, r, http.StatusOK, users); err != nil {
 		log.Error().
 			Err(err).
 			Msg("failed to encode GetUsers json response")
