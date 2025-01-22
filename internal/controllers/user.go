@@ -9,7 +9,7 @@ import (
 type UserRepository interface {
 	// define crud functions
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
-	GetUsers(ctx context.Context) (*models.UserList, error)
+	GetUsers(ctx context.Context) ([]models.User, error)
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	// TODO: GetFilteredUser()
 	DeleteUser(ctx context.Context, id string) (int, error)
@@ -30,7 +30,7 @@ func (c *UserController) GetUserById(ctx context.Context, id string) (*models.Us
 
 }
 
-func (c *UserController) GetUsers(ctx context.Context) (*models.UserList, error) {
+func (c *UserController) GetUsers(ctx context.Context) ([]models.User, error) {
 	users, err := c.Store.GetUsers(ctx)
 
 	if err != nil {
