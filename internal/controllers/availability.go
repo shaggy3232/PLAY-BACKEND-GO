@@ -9,7 +9,7 @@ import (
 type AvailbilityRepository interface {
 	// define crud functions
 	CreateAvailbility(ctx context.Context, Availbility models.Availbility) (*models.Availbility, error)
-	GetAvailbilitys(ctx context.Context) (*models.AvailbilityList, error)
+	GetAvailbilitys(ctx context.Context) ([]models.Availbility, error)
 	GetAvailbilityById(ctx context.Context, id string) (*models.Availbility, error)
 	// TODO: GetFilteredAvailbility()
 	DeleteAvailbility(ctx context.Context, id string) (int, error)
@@ -30,7 +30,7 @@ func (c *AvailbilityController) GetAvailbilityById(ctx context.Context, id strin
 
 }
 
-func (c *AvailbilityController) GetAvailbilitys(ctx context.Context) (*models.AvailbilityList, error) {
+func (c *AvailbilityController) GetAvailbilitys(ctx context.Context) ([]models.Availbility, error) {
 	Availbilitys, err := c.Store.GetAvailbilitys(ctx)
 
 	if err != nil {

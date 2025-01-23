@@ -8,7 +8,3 @@ type Availbility struct {
 	Start  string  `json:"start"`
 	End    string  `json:"end"`
 }
-
-type AvailbilityList struct {
-	Availbilities []*Availbility
-}
