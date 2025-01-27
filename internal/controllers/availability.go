@@ -6,51 +6,51 @@ import (
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
-type AvailbilityRepository interface {
+type AvailabilityRepository interface {
 	// define crud functions
-	CreateAvailbility(ctx context.Context, Availbility models.Availbility) (*models.Availbility, error)
-	GetAvailbilitys(ctx context.Context) ([]models.Availbility, error)
-	GetAvailbilityById(ctx context.Context, id string) (*models.Availbility, error)
-	// TODO: GetFilteredAvailbility()
-	DeleteAvailbility(ctx context.Context, id string) (int, error)
+	CreateAvailability(ctx context.Context, Availability models.Availability) (*models.Availability, error)
+	GetAvailabilitys(ctx context.Context) ([]models.Availability, error)
+	GetAvailabilityById(ctx context.Context, id string) (*models.Availability, error)
+	// TODO: GetFilteredAvailability()
+	DeleteAvailability(ctx context.Context, id string) (int, error)
 }
 
-type AvailbilityController struct {
-	Store AvailbilityRepository
+type AvailabilityController struct {
+	Store AvailabilityRepository
 }
 
-func (c *AvailbilityController) GetAvailbilityById(ctx context.Context, id string) (*models.Availbility, error) {
-	Availbility, err := c.Store.GetAvailbilityById(ctx, id)
+func (c *AvailabilityController) GetAvailabilityById(ctx context.Context, id string) (*models.Availability, error) {
+	Availability, err := c.Store.GetAvailabilityById(ctx, id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return Availbility, nil
+	return Availability, nil
 
 }
 
-func (c *AvailbilityController) GetAvailbilitys(ctx context.Context) ([]models.Availbility, error) {
-	Availbilitys, err := c.Store.GetAvailbilitys(ctx)
+func (c *AvailabilityController) GetAvailabilitys(ctx context.Context) ([]models.Availability, error) {
+	Availabilitys, err := c.Store.GetAvailabilitys(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return Availbilitys, nil
+	return Availabilitys, nil
 
 }
 
-func (c *AvailbilityController) CreateAvailbility(ctx context.Context, newAvailbility *models.Availbility) (*models.Availbility, error) {
-	createdAvailbility, err := c.Store.CreateAvailbility(ctx, *newAvailbility)
+func (c *AvailabilityController) CreateAvailability(ctx context.Context, newAvailability *models.Availability) (*models.Availability, error) {
+	createdAvailability, err := c.Store.CreateAvailability(ctx, *newAvailability)
 	if err != nil {
 		return nil, err
 	}
 
-	return createdAvailbility, nil
+	return createdAvailability, nil
 }
 
-func (c *AvailbilityController) DeleteAvailbility(ctx context.Context, id string) (*models.Availbility, error) {
+func (c *AvailabilityController) DeleteAvailability(ctx context.Context, id string) (*models.Availability, error) {
 	return nil, nil
 
 }

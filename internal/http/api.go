@@ -12,9 +12,11 @@ import (
 )
 
 type APIServer struct {
-	Port           int
-	Server         *http.Server
-	UserController *controllers.UserController
+	Port                   int
+	Server                 *http.Server
+	UserController         *controllers.UserController
+	AvailabilityController *controllers.AvailabilityController
+	BookingController      *controllers.BookingController
 }
 
 // APIServerOption defines a function that modifies the Server.
@@ -41,7 +43,17 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	r.Use(middleware.NewPanicMiddleware())
 	r.Use(middleware.NewLoggingMiddleware())
 
-	// routes
+	// User routes
+	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST")
+	r.HandleFunc("/users", api.HandleListUsers).Methods("GET")
+	r.HandleFunc("/users/{userID}", api.HandleGetUserById).Methods("GET")
+	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE")
+	// Availability routes
+	r.HandleFunc("/bookings", api.HandleCreateBooking).Methods("POST")
+	r.HandleFunc("/users", api.HandleListUsers).Methods("GET")
+	r.HandleFunc("/users/{userID}", api.HandleGetUserById).Methods("GET")
+	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE")
+	// Bookings routes
 	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST")
 	r.HandleFunc("/users", api.HandleListUsers).Methods("GET")
 	r.HandleFunc("/users/{userID}", api.HandleGetUserById).Methods("GET")
@@ -66,6 +78,17 @@ func WithPort(port int) APIServerOption {
 func WithUserController(userController *controllers.UserController) APIServerOption {
 	return func(a *APIServer) {
 		a.UserController = userController
+	}
+}
+func WithBookingController(bookingController *controllers.BookingController) APIServerOption {
+	return func(a *APIServer) {
+		a.BookingController = bookingController
+	}
+}
+
+func WithAvailabilityController(bookingController *controllers.BookingController) APIServerOption {
+	return func(a *APIServer) {
+		a.BookingController = bookingController
 	}
 }
 

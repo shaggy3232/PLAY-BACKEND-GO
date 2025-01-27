@@ -1,6 +1,6 @@
 package models
 
-type Availbility struct {
+type Availability struct {
 	///db schema
 	ID     string  `json:"id"` // string representation of UUID
 	UserID string  `json:"user_id"`
