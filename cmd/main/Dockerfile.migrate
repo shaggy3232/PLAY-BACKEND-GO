@@ -1,0 +1,15 @@
+# Use the official Golang image as the base image
+FROM golang:1.22.3-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Install Goose
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# Copy migration scripts
+COPY ../db/migrations /migrations
+COPY ../cmd/main/entrypoint.sh /migration
+
+# Set the entrypoint to Goose
+ENTRYPOINT ["goose"]

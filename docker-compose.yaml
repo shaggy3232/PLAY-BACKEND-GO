@@ -38,6 +38,22 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres123
       DB_NAME: postgres
+  
+  migrate:
+    build:
+      context: .
+      dockerfile: ./cmd/main/Dockerfile.migrate
+    entrypoint: ["/bin/sh", "/migrations/entrypoint.sh"]
+    environment:
+      DATABASE_URL: postgres://postgres:postgres123@db:5432/postgres?sslmode=disable
+    volumes:
+      - ./db/migrations:/migrations
+      - ../cmd/entrypoint.sh:/migrations/entrypoint.sh
+    depends_on:
+      db:
+        condition: service_healthy
+
+
 
 volumes:
   pgdata:

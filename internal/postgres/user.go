@@ -1,8 +1,9 @@
 package postgres
 
 import (
-  "context"
+	"context"
 
+	"github.com/rs/zerolog"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
@@ -11,6 +12,15 @@ func (c *Client) CreateUser(ctx context.Context, user models.User) (*models.User
 }
 
 func (c *Client) GetUsers(ctx context.Context) ([]models.User, error) {
+	log := zerolog.Ctx(ctx)
+
+	rows, err := c.pool.Exec(ctx, "SELECT * FROM users")
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to get users from the DB")
+	}
+	log.Print(rows)
 	return nil, nil
 
 }
