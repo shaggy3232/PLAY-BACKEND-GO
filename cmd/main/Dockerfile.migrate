@@ -9,7 +9,5 @@ RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Copy migration scripts
 COPY ../db/migrations /migrations
-COPY ../cmd/main/entrypoint.sh /migration
 
-# Set the entrypoint to Goose
-ENTRYPOINT ["goose"]
+ENTRYPOINT ["goose", "-dir", "/migrations", "postgres", "user=postgres password=postgres123 host=db port=5432 dbname=postgres sslmode=disable", "up"]

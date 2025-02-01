@@ -10,27 +10,27 @@ CREATE TABLE users (
     phone_number VARCHAR(11),
     type role NOT NULL,
     created_at TIMESTAMPTZ NOT NULL
-
-
 );
+
 CREATE TABLE availabilities (
     id UUID PRIMARY KEY,
-    user_id INT REFERENCES users (user_id),
+    user_id UUID REFERENCES users (id),
     price MONEY NOT NULL,
-    start TIMESTAMPTZ NOT NULL,
-    end TIMESTAMPTZ NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL
 );
+
 CREATE TABLE bookings (
     id UUID PRIMARY KEY,
-    referee_id INT REFERENCES users (user_id) NOT NULL,
-    organizer_id INT REFERENCES users (user_id) NOT NULL,
+    referee_id UUID REFERENCES users (id) NOT NULL,
+    organizer_id UUID REFERENCES users (id) NOT NULL,
     price MONEY NOT NULL,
-    start TIMESTAMPTZ NOT NULL,
-    end TIMESTAMPTZ NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
     location VARCHAR(100) NOT NULL,
     accepted BOOL NOT NULL,
-    cancelled BOOL NOT NULl,
+    cancelled BOOL NOT NULL,
     last_updated TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL
 );
