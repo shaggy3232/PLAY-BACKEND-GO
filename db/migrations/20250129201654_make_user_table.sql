@@ -3,13 +3,13 @@
 CREATE TYPE role AS ENUM ('ref', 'admin', 'org');
 
 CREATE TABLE users (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
     password VARCHAR(100) NOT NULL,
     phone_number VARCHAR(11),
-    type role NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
+    user_role role NOT NULL,
+    created_at TIMESTAMPTZ default NOW()
 );
 
 CREATE TABLE availabilities (

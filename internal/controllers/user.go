@@ -12,7 +12,7 @@ type UserRepository interface {
 	GetUsers(ctx context.Context) ([]models.User, error)
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	// TODO: GetFilteredUser()
-	DeleteUser(ctx context.Context, id string) (int, error)
+	DeleteUser(ctx context.Context, id string) (*models.User, error)
 }
 
 type UserController struct {
@@ -51,6 +51,11 @@ func (c *UserController) CreateUser(ctx context.Context, newUser *models.User) (
 }
 
 func (c *UserController) DeleteUser(ctx context.Context, id string) (*models.User, error) {
-	return nil, nil
+
+	deletedUser, err := c.Store.DeleteUser(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return deletedUser, nil
 
 }

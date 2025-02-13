@@ -89,6 +89,7 @@ func (api *APIServer) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	deletedUser, err := api.UserController.DeleteUser(r.Context(), userId)
+	log.Print(deletedUser)
 	if err != nil {
 		// TODO: distinguish between missing users and actual errors
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get user"})
