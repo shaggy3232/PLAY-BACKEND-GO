@@ -9,7 +9,7 @@ import (
 type AvailabilityRepository interface {
 	// define crud functions
 	CreateAvailability(ctx context.Context, Availability models.Availability) (*models.Availability, error)
-	GetAvailabilitys(ctx context.Context) ([]models.Availability, error)
+	GetAvailabilities(ctx context.Context) ([]models.Availability, error)
 	GetAvailabilityById(ctx context.Context, id string) (*models.Availability, error)
 	// TODO: GetFilteredAvailability()
 	DeleteAvailability(ctx context.Context, id string) (int, error)
@@ -20,25 +20,23 @@ type AvailabilityController struct {
 }
 
 func (c *AvailabilityController) GetAvailabilityById(ctx context.Context, id string) (*models.Availability, error) {
-	Availability, err := c.Store.GetAvailabilityById(ctx, id)
+	availability, err := c.Store.GetAvailabilityById(ctx, id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return Availability, nil
-
+	return availability, nil
 }
 
-func (c *AvailabilityController) GetAvailabilitys(ctx context.Context) ([]models.Availability, error) {
-	Availabilitys, err := c.Store.GetAvailabilitys(ctx)
+func (c *AvailabilityController) GetAvailabilities(ctx context.Context) ([]models.Availability, error) {
+	availabilities, err := c.Store.GetAvailabilities(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return Availabilitys, nil
-
+	return availabilities, nil
 }
 
 func (c *AvailabilityController) CreateAvailability(ctx context.Context, newAvailability *models.Availability) (*models.Availability, error) {

@@ -16,6 +16,7 @@ func (api *APIServer) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid user schema"})
 		return
 	}
+
 	newUser, err := api.UserController.CreateUser(r.Context(), &potentialUser)
 	if err != nil {
 		log.Error().
@@ -35,7 +36,6 @@ func (api *APIServer) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (api *APIServer) HandleListUsers(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
-
 	users, err := api.UserController.GetUsers(r.Context())
 
 	if err != nil {
@@ -63,12 +63,18 @@ func (api *APIServer) HandleGetUserById(w http.ResponseWriter, r *http.Request) 
 		log.Error().
 			Msg("failed to get id from request")
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing user id in request"})
+		return
 	}
 
 	user, err := api.UserController.GetUserById(r.Context(), userId)
 	if err != nil {
 		// TODO: distinguish between missing users and actual errors
+		log.Error().
+			Err(err).
+			Msg("failed to get user")
+
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get user"})
+		return
 	}
 
 	if err := encode(w, r, http.StatusOK, user); err != nil {
@@ -92,7 +98,12 @@ func (api *APIServer) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	log.Print(deletedUser)
 	if err != nil {
 		// TODO: distinguish between missing users and actual errors
+		log.Error().
+			Err(err).
+			Msg("failed to delete user")
+
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get user"})
+		return
 	}
 
 	if err := encode(w, r, http.StatusOK, deletedUser); err != nil {
@@ -110,12 +121,12 @@ func (api *APIServer) HandleCreateBooking(w http.ResponseWriter, r *http.Request
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid user schema"})
 		return
 	}
+
 	newBooking, err := api.BookingController.CreateBooking(r.Context(), &potentialBooking)
 	if err != nil {
 		log.Error().
 			Err(err).
-			Msg("failed to create user")
-
+			Msg("failed to create booking")
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "internal server error"})
 		return
 	}
@@ -129,14 +140,12 @@ func (api *APIServer) HandleCreateBooking(w http.ResponseWriter, r *http.Request
 
 func (api *APIServer) HandleListBookings(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
-
 	users, err := api.BookingController.GetBookings(r.Context())
 
 	if err != nil {
 		log.Error().
 			Err(err).
-			Msg("failed to create user")
-
+			Msg("failed to get bookings")
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "internal server error"})
 		return
 	}
@@ -157,12 +166,18 @@ func (api *APIServer) HandleGetBookingById(w http.ResponseWriter, r *http.Reques
 		log.Error().
 			Msg("failed to get id from request")
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing user id in request"})
+		return
 	}
 
 	user, err := api.BookingController.GetBookingById(r.Context(), userId)
 	if err != nil {
-		// TODO: distinguish between missing users and actual errors
+		// TODO: distinguish between missing bookings and actual errors
+		log.Error().
+			Err(err).
+			Msg("failed to get booking")
+
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get user"})
+		return
 	}
 
 	if err := encode(w, r, http.StatusOK, user); err != nil {
@@ -180,12 +195,18 @@ func (api *APIServer) HandleDeleteBooking(w http.ResponseWriter, r *http.Request
 		log.Error().
 			Msg("failed to get id from request")
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing user id in request"})
+		return
 	}
 
 	deletedBooking, err := api.BookingController.DeleteBooking(r.Context(), userId)
 	if err != nil {
 		// TODO: distinguish between missing users and actual errors
+		log.Error().
+			Err(err).
+			Msg("failed to delete booking")
+
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get user"})
+		return
 	}
 
 	if err := encode(w, r, http.StatusOK, deletedBooking); err != nil {
@@ -203,6 +224,7 @@ func (api *APIServer) HandleCreateAvailability(w http.ResponseWriter, r *http.Re
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid availability schema"})
 		return
 	}
+
 	newAvailability, err := api.AvailabilityController.CreateAvailability(r.Context(), &potentialAvailability)
 	if err != nil {
 		log.Error().
@@ -220,21 +242,20 @@ func (api *APIServer) HandleCreateAvailability(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func (api *APIServer) HandleListAvailabilitys(w http.ResponseWriter, r *http.Request) {
+func (api *APIServer) HandleListAvailabilities(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
-
-	availabilitys, err := api.AvailabilityController.GetAvailabilitys(r.Context())
+	availabilities, err := api.AvailabilityController.GetAvailabilities(r.Context())
 
 	if err != nil {
 		log.Error().
 			Err(err).
-			Msg("failed to create availability")
+			Msg("failed to get availabilities")
 
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "internal server error"})
 		return
 	}
 
-	if err := encode[[]models.Availability](w, r, http.StatusOK, availabilitys); err != nil {
+	if err := encode[[]models.Availability](w, r, http.StatusOK, availabilities); err != nil {
 		log.Error().
 			Err(err).
 			Msg("failed to encode GetAvailabilitys json response")
@@ -250,12 +271,18 @@ func (api *APIServer) HandleGetAvailabilityById(w http.ResponseWriter, r *http.R
 		log.Error().
 			Msg("failed to get id from request")
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing availability id in request"})
+		return
 	}
 
 	availability, err := api.AvailabilityController.GetAvailabilityById(r.Context(), availabilityId)
 	if err != nil {
-		// TODO: distinguish between missing availabilitys and actual errors
+		// TODO: distinguish between missing availabilities and actual errors
+		log.Error().
+			Err(err).
+			Msg("failed to get availability")
+
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get availability"})
+		return
 	}
 
 	if err := encode(w, r, http.StatusOK, availability); err != nil {
@@ -273,12 +300,18 @@ func (api *APIServer) HandleDeleteAvailability(w http.ResponseWriter, r *http.Re
 		log.Error().
 			Msg("failed to get id from request")
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing availability id in request"})
+		return
 	}
 
 	deletedAvailability, err := api.AvailabilityController.DeleteAvailability(r.Context(), availabilityId)
 	if err != nil {
-		// TODO: distinguish between missing availabilitys and actual errors
+		// TODO: distinguish between missing availabilities and actual errors
+		log.Error().
+			Err(err).
+			Msg("failed to delete availability")
+
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get availability"})
+		return
 	}
 
 	if err := encode(w, r, http.StatusOK, deletedAvailability); err != nil {
