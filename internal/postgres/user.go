@@ -5,15 +5,25 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/http"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
 func (c *Client) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
 	log := zerolog.Ctx(ctx)
 	var lastInsetedId uuid.UUID
-	// TODO: bcrypt crypto hash password
+
 	log.Debug().Interface("user", user)
-	err := c.pool.QueryRow(ctx, "INSERT INTO users (name, email, password, phone_number, user_role) VALUES ($1,$2,$3,$4,$5) RETURNING ID", user.Name, user.Email, user.Password, user.PhoneNumber, user.UserRole).Scan(&lastInsetedId)
+
+	encyptedPassword, err := http.HashPassword(user.Password)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to encrypt Password")
+	}
+
+	err = c.pool.QueryRow(ctx, "INSERT INTO users (name, email, password, phone_number, user_role) VALUES ($1,$2,$3,$4,$5) RETURNING ID", user.Name, user.Email, encyptedPassword, user.PhoneNumber, user.UserRole).Scan(&lastInsetedId)
 
 	if err != nil {
 		return nil, err
@@ -59,7 +69,14 @@ func (c *Client) GetUserById(ctx context.Context, id string) (*models.User, erro
 }
 
 func (c *Client) UpdateUser(ctx context.Context, user models.User) (*models.User, error) {
-	_, err := c.pool.Exec(ctx, "UPDATE users SET name = $1, email = $2, password = $3, phone_number = $4, user_role = $5 WHERE id = $6", user.Name, user.Email, user.Password, user.PhoneNumber, user.UserRole, user.ID)
+
+	encyptedPassword, err := http.HashPassword(user.Password)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to encrypt Password")
+	}
+	_, err = c.pool.Exec(ctx, "UPDATE users SET name = $1, email = $2, password = $3, phone_number = $4, user_role = $5 WHERE id = $6", user.Name, user.Email, encyptedPassword, user.PhoneNumber, user.UserRole, user.ID)
 	if err != nil {
 		return nil, err
 	}
