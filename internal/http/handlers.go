@@ -55,6 +55,33 @@ func (api *APIServer) HandleListUsers(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (api *APIServer) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+
+	newUser, err := decode[models.User](r)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to create user")
+	}
+
+	updatedUser, err := api.UserController.UpdateUser(r.Context(), &newUser)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to create user")
+
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "internal server error"})
+		return
+	}
+	if err := encode(w, r, http.StatusOK, updatedUser); err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to encode the updatedUser json response")
+	}
+
+}
+
 func (api *APIServer) HandleGetUserById(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
 	vars := mux.Vars(r)
