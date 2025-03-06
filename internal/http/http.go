@@ -4,7 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
+
+var jwtSecret = []byte("your-secret-key")
+
+type Claims struct {
+	UserID uint `json:"user_id"`
+	jwt.RegisteredClaims
+}
 
 // encode encodes the response and writes it
 func encode[T any](w http.ResponseWriter, r *http.Request, status int, v T) error {
@@ -25,4 +35,15 @@ func decode[T any](r *http.Request) (T, error) {
 		return v, fmt.Errorf("decode json: %w", err)
 	}
 	return v, nil
+}
+
+func GenerateJWT(userID uint) (string, error) {
+	claims := &Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)), // 1-hour expiry
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
 }

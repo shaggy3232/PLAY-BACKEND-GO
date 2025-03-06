@@ -43,10 +43,16 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	r.Use(middleware.NewPanicMiddleware())
 	r.Use(middleware.NewLoggingMiddleware())
 
+	//Login Routes
+	r.HandleFunc("/login", api.HandleUserLogin).Methods("POST")
+
+	protectedRoutes := r.PathPrefix("/api").Subrouter()
+	protectedRoutes.Use(middleware.JWTMiddleware)
+
 	// User routes
 	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST")
 	r.HandleFunc("/users", api.HandleUpdateUser).Methods("PUT")
-	r.HandleFunc("/users/{userID}/", api.HandleGetUserById).Methods("GET")
+	protectedRoutes.HandleFunc("/users/{userID}/", api.HandleGetUserById).Methods("GET")
 	r.HandleFunc("/users", api.HandleListUsers).Methods("GET")
 	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE")
 
@@ -61,6 +67,8 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	r.HandleFunc("/bookings/{bookingID}", api.HandleGetBookingById).Methods("GET")
 	r.HandleFunc("/bookings", api.HandleListBookings).Methods("GET")
 	r.HandleFunc("/bookings/{bookingID}", api.HandleDeleteBooking).Methods("DELETE")
+
+	http.Handle("/users", r)
 
 	http.Handle("/", r)
 

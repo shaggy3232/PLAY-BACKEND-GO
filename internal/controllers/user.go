@@ -14,6 +14,7 @@ type UserRepository interface {
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	// TODO: GetFilteredUser()
 	DeleteUser(ctx context.Context, id string) (*models.User, error)
+	GetUserFromEmail(ctx context.Context, email string) (*models.User, error)
 }
 
 type UserController struct {
@@ -68,4 +69,13 @@ func (c *UserController) DeleteUser(ctx context.Context, id string) (*models.Use
 	}
 	return deletedUser, nil
 
+}
+
+func (c *UserController) GetUserFromEmail(ctx context.Context, email string) (*models.User, error) {
+	user, err := c.Store.GetUserFromEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, err
 }

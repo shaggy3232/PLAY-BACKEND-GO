@@ -16,7 +16,7 @@ func (c *Client) CreateUser(ctx context.Context, user models.User) (*models.User
 
 	log.Debug().Interface("user", user)
 
-	encyptedPassword, err := hashPassword(user.Password)
+	encyptedPassword, err := HashPassword(user.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *Client) GetUserById(ctx context.Context, id string) (*models.User, erro
 }
 
 func (c *Client) UpdateUser(ctx context.Context, user models.User) (*models.User, error) {
-	encyptedPassword, err := hashPassword(user.Password)
+	encyptedPassword, err := HashPassword(user.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,20 @@ func (c *Client) DeleteUser(ctx context.Context, id string) (*models.User, error
 	return &user, nil
 }
 
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	return string(bytes), err
+}
+
+func (c *Client) GetUserFromEmail(ctx context.Context, email string) (*models.User, error) {
+	var user models.User
+	var uid uuid.UUID
+	err := c.pool.QueryRow(ctx, "SELECT id, name, email, password, phone_number, user_role, created_at FROM users WHERE email = $1", email).Scan(&uid, &user.Name, &user.Email, &user.Password, &user.PhoneNumber, &user.UserRole, &user.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	user.ID = uid.String()
+	return &user, nil
+
 }

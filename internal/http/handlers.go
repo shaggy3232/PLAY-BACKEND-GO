@@ -2,11 +2,16 @@ package http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
+	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/http/auth"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
+	"golang.org/x/crypto/bcrypt"
 )
+
+// user requests
 
 func (api *APIServer) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
@@ -140,6 +145,70 @@ func (api *APIServer) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (api *APIServer) HandleUserLogin(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+
+	creds, err := decode[models.Login](r)
+	if err != nil {
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid login format"})
+		return
+	}
+	//validate that the password is correct and and the user exist
+	user, err := api.UserController.GetUserFromEmail(r.Context(), creds.Email)
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to get user")
+
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get user"})
+		return
+	}
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to get user")
+
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to hash the given credentials"})
+		return
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(creds.Password))
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Passwords do not match")
+
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "passwords do not match"})
+		return
+	}
+
+	//create a token and assign it in the response as a cookie
+	token, err := auth.GenerateJWT(user.ID)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Could not generate a token")
+
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "Could not generate Token"})
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		HttpOnly: true,                    // Prevents JavaScript access (protects against XSS)
+		Secure:   true,                    // Requires HTTPS
+		SameSite: http.SameSiteStrictMode, // Prevents CSRF
+		Expires:  time.Now().Add(1 * time.Hour),
+	})
+	w.WriteHeader(http.StatusOK)
+
+}
+
+// booking requests
+
 func (api *APIServer) HandleCreateBooking(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
 
@@ -242,6 +311,8 @@ func (api *APIServer) HandleDeleteBooking(w http.ResponseWriter, r *http.Request
 			Msg("failed to encode deleted Booking json response")
 	}
 }
+
+//availability requests
 
 func (api *APIServer) HandleCreateAvailability(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())

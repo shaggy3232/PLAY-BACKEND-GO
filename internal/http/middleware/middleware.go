@@ -2,9 +2,12 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog"
 )
 
@@ -52,4 +55,35 @@ func NewPanicMiddleware() func(http.Handler) http.Handler {
 
 		return http.HandlerFunc(fn)
 	}
+}
+
+// Middleware for JWT authentication
+func JWTMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Get the JWT from the cookie
+		cookie, err := r.Cookie("token")
+		if err != nil {
+			http.Error(w, "Unauthorized: No token found", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := cookie.Value
+
+		// Parse the token
+		claims := &jwt.RegisteredClaims{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method")
+			}
+			return []byte(os.Getenv("jwtSecret")), nil
+		})
+
+		if err != nil || !token.Valid {
+			http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		// Continue to the next handler
+		next.ServeHTTP(w, r)
+	})
 }

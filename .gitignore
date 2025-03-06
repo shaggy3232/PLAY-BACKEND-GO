@@ -1,1 +1,3 @@
 .vscode/*
+.DS_Store
+/cmd/main/env.go

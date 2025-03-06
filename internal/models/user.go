@@ -12,3 +12,13 @@ type User struct {
 	UserRole    string    `json:"user_role"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+type Login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	token   string
+	message string
+}
