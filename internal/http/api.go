@@ -57,10 +57,11 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE")
 
 	// Availability routes
-	r.HandleFunc("/users/{userID}/availabilities", api.HandleCreateAvailability).Methods("POST")
-	r.HandleFunc("/users/{userID}/availabilities/{availabilityID}", api.HandleGetAvailabilityById).Methods("GET")
-	r.HandleFunc("/users/{userID}/availabilities", api.HandleListAvailabilities).Methods("GET")
-	r.HandleFunc("/users/{userID}/avialabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE")
+	r.HandleFunc("/availabilities", api.HandleCreateAvailability).Methods("POST")
+	r.HandleFunc("/availabilities/{availabilityID}", api.HandleGetAvailabilityById).Methods("GET")
+	r.HandleFunc("/availabilities/{userID}", api.HandleGetUsersAvailability).Methods("GET")
+	r.HandleFunc("/availabilities", api.HandleListAvailabilities).Methods("GET")
+	r.HandleFunc("/avialabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE")
 
 	// Bookings routes
 	r.HandleFunc("/bookings", api.HandleCreateBooking).Methods("POST")
@@ -97,9 +98,9 @@ func WithBookingController(bookingController *controllers.BookingController) API
 	}
 }
 
-func WithAvailabilityController(bookingController *controllers.BookingController) APIServerOption {
+func WithAvailabilityController(availabilityController *controllers.AvailabilityController) APIServerOption {
 	return func(a *APIServer) {
-		a.BookingController = bookingController
+		a.AvailabilityController = availabilityController
 	}
 }
 

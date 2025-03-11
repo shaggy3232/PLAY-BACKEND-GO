@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
@@ -12,6 +13,7 @@ type BookingRepository interface {
 	GetBookings(ctx context.Context) ([]models.Booking, error)
 	GetBookingById(ctx context.Context, id string) (*models.Booking, error)
 	// TODO: GetFilteredBooking()
+	CheckConflicts(ctx context.Context, userID string, start time.Time, end time.Time) (bool, error)
 	DeleteBooking(ctx context.Context, id string) (int, error)
 }
 
@@ -52,5 +54,15 @@ func (c *BookingController) CreateBooking(ctx context.Context, newBooking *model
 
 func (c *BookingController) DeleteBooking(ctx context.Context, id string) (*models.Booking, error) {
 	return nil, nil
+
+}
+
+func (c *BookingController) CheckConflicts(ctx context.Context, userID string, start time.Time, end time.Time) (bool, error) {
+	isConflict, err := c.Store.CheckConflicts(ctx, userID, start, end)
+	if err != nil {
+		return true, err
+	}
+
+	return isConflict, nil
 
 }

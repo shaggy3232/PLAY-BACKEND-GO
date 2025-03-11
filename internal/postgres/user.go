@@ -4,17 +4,14 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
 func (c *Client) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
-	log := zerolog.Ctx(ctx)
-	var lastInsetedId uuid.UUID
 
-	log.Debug().Interface("user", user)
+	var lastInsetedId uuid.UUID
 
 	encyptedPassword, err := HashPassword(user.Password)
 	if err != nil {

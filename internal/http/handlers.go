@@ -165,14 +165,6 @@ func (api *APIServer) HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err != nil {
-		log.Error().
-			Err(err).
-			Msg("failed to get user")
-
-		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to hash the given credentials"})
-		return
-	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(creds.Password))
 
 	if err != nil {
@@ -417,4 +409,28 @@ func (api *APIServer) HandleDeleteAvailability(w http.ResponseWriter, r *http.Re
 			Err(err).
 			Msg("failed to encode deleted Availability json response")
 	}
+}
+
+func (api *APIServer) HandleGetUsersAvailability(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+	vars := mux.Vars(r)
+	userID, ok := vars["userID"]
+	if !ok {
+		log.Error().
+			Msg("failed to get id from request")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing availability id in request"})
+		return
+	}
+
+	userAvailability, err := api.AvailabilityController.GetAvailabilityByUser(r.Context(), userID)
+	if err != nil {
+		log.Error().
+			Msg("Failed to get availability for the database")
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get availabilities"})
+		return
+	}
+	if err := encode(w, r, http.StatusOK, userAvailability); err != nil {
+		log.Error().Msg("FAILED TO ENCODE THE AVAILABILITIES TO JSON")
+	}
+
 }

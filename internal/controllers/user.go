@@ -12,7 +12,9 @@ type UserRepository interface {
 	UpdateUser(ctx context.Context, user models.User) (*models.User, error)
 	GetUsers(ctx context.Context) ([]models.User, error)
 	GetUserById(ctx context.Context, id string) (*models.User, error)
-	// TODO: GetFilteredUser()
+	// TODO: GetFilteredUser() -> based on price, and availability
+	// Maybe IsUserAvailable return bool if user is available to cycle through all users and check if they are avaialble -> seems ineffecient if we can can just return a full list of available users
+	//GetAvailalbleUsers(ctx context.Context, start string, end string) ([]models.User, error)
 	DeleteUser(ctx context.Context, id string) (*models.User, error)
 	GetUserFromEmail(ctx context.Context, email string) (*models.User, error)
 }
