@@ -9,7 +9,7 @@ import (
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
-func (c *Client) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
+func (c *Client) CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 
 	var lastInsetedId uuid.UUID
 
@@ -25,7 +25,7 @@ func (c *Client) CreateUser(ctx context.Context, user models.User) (*models.User
 
 	user.ID = lastInsetedId.String()
 
-	return &user, nil
+	return user, nil
 }
 
 func (c *Client) GetUsers(ctx context.Context) ([]models.User, error) {
@@ -62,7 +62,7 @@ func (c *Client) GetUserById(ctx context.Context, id string) (*models.User, erro
 
 }
 
-func (c *Client) UpdateUser(ctx context.Context, user models.User) (*models.User, error) {
+func (c *Client) UpdateUser(ctx context.Context, user *models.User) (*models.User, error) {
 	encyptedPassword, err := HashPassword(user.Password)
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (c *Client) UpdateUser(ctx context.Context, user models.User) (*models.User
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 func (c *Client) DeleteUser(ctx context.Context, id string) (*models.User, error) {

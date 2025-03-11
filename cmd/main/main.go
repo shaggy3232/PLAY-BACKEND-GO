@@ -66,10 +66,14 @@ func (a *App) Run(ctx context.Context) {
 	}
 
 	userController := controllers.UserController{Store: db}
+	availabilityController := controllers.AvailabilityController{Store: db}
+	bookingController := controllers.BookingController{Store: db}
 
 	api := playhttp.NewAPIServer(
 		playhttp.WithPort(8080),
 		playhttp.WithUserController(&userController),
+		playhttp.WithAvailabilityController(&availabilityController),
+		playhttp.WithBookingController(&bookingController),
 	)
 
 	a.API = api

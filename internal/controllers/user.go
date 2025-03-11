@@ -8,8 +8,8 @@ import (
 
 type UserRepository interface {
 	// define crud functions
-	CreateUser(ctx context.Context, user models.User) (*models.User, error)
-	UpdateUser(ctx context.Context, user models.User) (*models.User, error)
+	CreateUser(ctx context.Context, user *models.User) (*models.User, error)
+	UpdateUser(ctx context.Context, user *models.User) (*models.User, error)
 	GetUsers(ctx context.Context) ([]models.User, error)
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	// TODO: GetFilteredUser() -> based on price, and availability
@@ -46,7 +46,7 @@ func (c *UserController) GetUsers(ctx context.Context) ([]models.User, error) {
 }
 
 func (c *UserController) CreateUser(ctx context.Context, newUser *models.User) (*models.User, error) {
-	createdUser, err := c.Store.CreateUser(ctx, *newUser)
+	createdUser, err := c.Store.CreateUser(ctx, newUser)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (c *UserController) CreateUser(ctx context.Context, newUser *models.User) (
 }
 
 func (c *UserController) UpdateUser(ctx context.Context, newUser *models.User) (*models.User, error) {
-	updatedUser, err := c.Store.UpdateUser(ctx, *newUser)
+	updatedUser, err := c.Store.UpdateUser(ctx, newUser)
 	if err != nil {
 		return nil, err
 	}

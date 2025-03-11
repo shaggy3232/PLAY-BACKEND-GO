@@ -8,13 +8,13 @@ import (
 
 type AvailabilityRepository interface {
 	// define crud functions
-	CreateAvailability(ctx context.Context, Availability models.Availability) (*models.Availability, error)
+	CreateAvailability(ctx context.Context, Availability *models.Availability) (*models.Availability, error)
 	GetAvailabilities(ctx context.Context) ([]models.Availability, error)
 	GetAvailabilityById(ctx context.Context, id string) (*models.Availability, error)
 	// TODO: GetFilteredAvailability()
 	GetAvailabilityByUser(ctx context.Context, userId string) ([]models.Availability, error)
 
-	DeleteAvailability(ctx context.Context, id string) (int, error)
+	DeleteAvailability(ctx context.Context, id string) (*models.Availability, error)
 }
 
 type AvailabilityController struct {
@@ -42,7 +42,7 @@ func (c *AvailabilityController) GetAvailabilities(ctx context.Context) ([]model
 }
 
 func (c *AvailabilityController) CreateAvailability(ctx context.Context, newAvailability *models.Availability) (*models.Availability, error) {
-	createdAvailability, err := c.Store.CreateAvailability(ctx, *newAvailability)
+	createdAvailability, err := c.Store.CreateAvailability(ctx, newAvailability)
 	if err != nil {
 		return nil, err
 	}

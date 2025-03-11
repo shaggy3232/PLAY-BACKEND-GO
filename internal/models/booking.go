@@ -7,8 +7,9 @@ type Booking struct {
 	Price       float32 `json:"price"`
 	Start       string  `json:"start"`
 	End         string  `json:"end"`
+	Location    string  `json:"location"`
 	Accepted    bool    `json:"accepted"`
-	Cancled     bool    `json:"canceled"`
+	Cancelled   bool    `json:"canceled"`
 	LastUpdated string  `json:"last_updated"`
 	CreatedAt   string  `json:"created_at"`
 }

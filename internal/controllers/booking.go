@@ -9,12 +9,12 @@ import (
 
 type BookingRepository interface {
 	// define crud functions
-	CreateBooking(ctx context.Context, Booking models.Booking) (*models.Booking, error)
+	CreateBooking(ctx context.Context, Booking *models.Booking) (*models.Booking, error)
 	GetBookings(ctx context.Context) ([]models.Booking, error)
 	GetBookingById(ctx context.Context, id string) (*models.Booking, error)
 	// TODO: GetFilteredBooking()
 	CheckConflicts(ctx context.Context, userID string, start time.Time, end time.Time) (bool, error)
-	DeleteBooking(ctx context.Context, id string) (int, error)
+	DeleteBooking(ctx context.Context, id string) (*models.Booking, error)
 }
 
 type BookingController struct {
@@ -44,7 +44,7 @@ func (c *BookingController) GetBookings(ctx context.Context) ([]models.Booking, 
 }
 
 func (c *BookingController) CreateBooking(ctx context.Context, newBooking *models.Booking) (*models.Booking, error) {
-	createdBooking, err := c.Store.CreateBooking(ctx, *newBooking)
+	createdBooking, err := c.Store.CreateBooking(ctx, newBooking)
 	if err != nil {
 		return nil, err
 	}
