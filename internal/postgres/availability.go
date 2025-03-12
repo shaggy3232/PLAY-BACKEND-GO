@@ -2,17 +2,22 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
 func (c *Client) CreateAvailability(ctx context.Context, newAvailability *models.Availability) (*models.Availability, error) {
-
+	log := zerolog.Ctx(ctx)
 	var availID uuid.UUID
 
-	err := c.pool.QueryRow(ctx, "INSERT INTO availabilities (user_id, price, start_time, end_time) VALUES ($1,$2,$3,$4) RETURNING ID", newAvailability.UserID, newAvailability.Price, newAvailability.Start, newAvailability.End).Scan(&availID)
+	err := c.pool.QueryRow(ctx, "INSERT INTO availabilities (user_id, price, start_time, end_time) VALUES ($1,$2,$3,$4) RETURNING id", newAvailability.UserID, newAvailability.Price, newAvailability.Start, newAvailability.End).Scan(&availID)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("cannot insert into database")
 		return nil, err
 	}
 
@@ -35,7 +40,8 @@ func (c *Client) GetAvailabilities(ctx context.Context) ([]models.Availability, 
 		var id uuid.UUID
 		var user uuid.UUID
 
-		if err := rows.Scan(&id, &user, &avail.Price, &avail.Start, &avail.End); err != nil {
+		if err := rows.Scan(&id, &user, &avail.Price, &avail.Start, &avail.End, &avail.CreatedAt); err != nil {
+			fmt.Println(err)
 			return nil, err
 		}
 		avail.ID = id.String()
@@ -103,17 +109,23 @@ func (c *Client) UpdateAvailability(ctx context.Context, updatedAvail models.Ava
 }
 
 func (c *Client) DeleteAvailability(ctx context.Context, id string) (*models.Availability, error) {
+	var avail models.Availability
+	var availID uuid.UUID
+	log := zerolog.Ctx(ctx)
 
-	avail, err := c.GetAvailabilityById(ctx, id)
+	log.Print(id)
+	err := c.pool.QueryRow(ctx, "SELECT * FROM availabilities WHERE id = $1", id).Scan(&availID, &avail.UserID, &avail.Price, &avail.Start, &avail.End, &avail.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
-	_, err = c.pool.Exec(ctx, "DELETE FROM availabilities WHERE id = $1", avail.ID)
+	avail.ID = availID.String()
+
+	_, err = c.pool.Exec(ctx, "DELETE FROM availabilities WHERE id = $1", id)
 	if err != nil {
 		return nil, err
 	}
 
-	return avail, nil
+	return &avail, nil
 }
 
 //func (c *Client) GetAllAvailableUsers(ctx context.Context)

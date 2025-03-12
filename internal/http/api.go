@@ -58,10 +58,10 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 
 	// Availability routes
 	r.HandleFunc("/availabilities", api.HandleCreateAvailability).Methods("POST")
+	r.HandleFunc("/avialabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE")
 	r.HandleFunc("/availabilities/{availabilityID}", api.HandleGetAvailabilityById).Methods("GET")
 	r.HandleFunc("/availabilities/{userID}", api.HandleGetUsersAvailability).Methods("GET")
 	r.HandleFunc("/availabilities", api.HandleListAvailabilities).Methods("GET")
-	r.HandleFunc("/avialabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE")
 
 	// Bookings routes
 	r.HandleFunc("/bookings", api.HandleCreateBooking).Methods("POST")

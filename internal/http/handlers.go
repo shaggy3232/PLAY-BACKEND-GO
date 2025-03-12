@@ -311,7 +311,11 @@ func (api *APIServer) HandleCreateAvailability(w http.ResponseWriter, r *http.Re
 
 	potentialAvailability, err := decode[models.Availability](r)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Cannot decode the request into availability model")
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid availability schema"})
+
 		return
 	}
 
@@ -384,16 +388,18 @@ func (api *APIServer) HandleGetAvailabilityById(w http.ResponseWriter, r *http.R
 
 func (api *APIServer) HandleDeleteAvailability(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
+
 	vars := mux.Vars(r)
 	availabilityId, ok := vars["availabilityID"]
 	if !ok {
 		log.Error().
 			Msg("failed to get id from request")
 		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing availability id in request"})
-		return
+
 	}
 
 	deletedAvailability, err := api.AvailabilityController.DeleteAvailability(r.Context(), availabilityId)
+	log.Print(deletedAvailability)
 	if err != nil {
 		// TODO: distinguish between missing availabilities and actual errors
 		log.Error().
@@ -408,6 +414,7 @@ func (api *APIServer) HandleDeleteAvailability(w http.ResponseWriter, r *http.Re
 		log.Error().
 			Err(err).
 			Msg("failed to encode deleted Availability json response")
+		return
 	}
 }
 

@@ -13,19 +13,19 @@ CREATE TABLE users (
 );
 
 CREATE TABLE availabilities (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users (id),
-    price MONEY NOT NULL,
+    price NUMERIC(10,5) NOT NULL,
     start_time TIMESTAMPTZ NOT NULL,
     end_time TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
+    created_at TIMESTAMPTZ default NOW()
 );
 
 CREATE TABLE bookings (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     referee_id UUID REFERENCES users (id) NOT NULL,
     organizer_id UUID REFERENCES users (id) NOT NULL,
-    price MONEY NOT NULL,
+    price NUMERIC(10,5) NOT NULL,
     start_time TIMESTAMPTZ NOT NULL,
     end_time TIMESTAMPTZ NOT NULL,
     location VARCHAR(100) NOT NULL,

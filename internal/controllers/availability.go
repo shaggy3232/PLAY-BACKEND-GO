@@ -51,7 +51,13 @@ func (c *AvailabilityController) CreateAvailability(ctx context.Context, newAvai
 }
 
 func (c *AvailabilityController) DeleteAvailability(ctx context.Context, id string) (*models.Availability, error) {
-	return nil, nil
+	deletedAvailability, err := c.Store.DeleteAvailability(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return deletedAvailability, nil
 
 }
 
