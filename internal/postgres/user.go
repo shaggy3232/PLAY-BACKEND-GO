@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -107,5 +108,33 @@ func (c *Client) GetUserFromEmail(ctx context.Context, email string) (*models.Us
 
 	user.ID = uid.String()
 	return &user, nil
+
+}
+
+func (c *Client) GetAvailalbleUsers(ctx context.Context, start time.Time, end time.Time) ([]models.User, error) {
+	var avaiableUsers []models.User
+	//convert the start and end time to UTC
+	start = start.UTC()
+	end = end.UTC()
+
+	rows, err := c.pool.Query(ctx, "SELECT * FROM users u WHERE u.id IN (SELECT a.user_id FROM availabilities a WHERE a.start_time <= $1 AND a.end_time >= $2)", start, end)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var user models.User
+		var id uuid.UUID
+
+		if err := rows.Scan(&id, &user.Name, &user.Email, &user.Password, &user.PhoneNumber, &user.UserRole, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+		user.ID = id.String()
+		avaiableUsers = append(avaiableUsers, user)
+
+	}
+
+	return avaiableUsers, nil
 
 }

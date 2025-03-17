@@ -127,5 +127,3 @@ func (c *Client) DeleteAvailability(ctx context.Context, id string) (*models.Ava
 
 	return &avail, nil
 }
-
-//func (c *Client) GetAllAvailableUsers(ctx context.Context)

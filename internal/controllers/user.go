@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
@@ -14,7 +15,7 @@ type UserRepository interface {
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	// TODO: GetFilteredUser() -> based on price, and availability
 	// Maybe IsUserAvailable return bool if user is available to cycle through all users and check if they are avaialble -> seems ineffecient if we can can just return a full list of available users
-	//GetAvailalbleUsers(ctx context.Context, start string, end string) ([]models.User, error)
+	GetAvailalbleUsers(ctx context.Context, start time.Time, end time.Time) ([]models.User, error)
 	DeleteUser(ctx context.Context, id string) (*models.User, error)
 	GetUserFromEmail(ctx context.Context, email string) (*models.User, error)
 }
@@ -80,4 +81,13 @@ func (c *UserController) GetUserFromEmail(ctx context.Context, email string) (*m
 	}
 
 	return user, err
+}
+
+func (c *UserController) GetAvailableUsers(ctx context.Context, start time.Time, end time.Time) ([]models.User, error) {
+	avaiableUsers, err := c.Store.GetAvailalbleUsers(ctx, start, end)
+	if err != nil {
+		return nil, err
+	}
+
+	return avaiableUsers, nil
 }
