@@ -248,7 +248,7 @@ func (api *APIServer) HandleCreateBooking(w http.ResponseWriter, r *http.Request
 
 	potentialBooking, err := decode[models.Booking](r)
 	if err != nil {
-		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid user schema"})
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid booking schema"})
 		return
 	}
 
@@ -344,6 +344,27 @@ func (api *APIServer) HandleDeleteBooking(w http.ResponseWriter, r *http.Request
 			Err(err).
 			Msg("failed to encode deleted Booking json response")
 	}
+}
+
+func (api *APIServer) HandleEditBookings(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+
+	booking, err := decode[models.Booking](r)
+	if err != nil {
+		log.Error().Err(err).Msg("could not decode request into booking")
+	}
+
+	updatedBooking, err := api.BookingController.EditBooking(r.Context(), booking)
+
+	if err != nil {
+		log.Error().Err(err).Msg("Could not update the booking")
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "Could not update the booking"})
+	}
+
+	if err := encode(w, r, http.StatusOK, updatedBooking); err != nil {
+		log.Error().Err(err).Msg("failed to create Json response with the updated booking")
+	}
+
 }
 
 //availability requests

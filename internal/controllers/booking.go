@@ -15,6 +15,8 @@ type BookingRepository interface {
 	// TODO: GetFilteredBooking()
 	CheckConflicts(ctx context.Context, userID string, start time.Time, end time.Time) (bool, error)
 	DeleteBooking(ctx context.Context, id string) (*models.Booking, error)
+	AcceptBooking(ctx context.Context, id string) (*models.Booking, error)
+	EditBooking(ctx context.Context, booking models.Booking) (models.Booking, error)
 }
 
 type BookingController struct {
@@ -53,7 +55,11 @@ func (c *BookingController) CreateBooking(ctx context.Context, newBooking *model
 }
 
 func (c *BookingController) DeleteBooking(ctx context.Context, id string) (*models.Booking, error) {
-	return nil, nil
+	booking, err := c.Store.DeleteBooking(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return booking, nil
 
 }
 
@@ -65,4 +71,23 @@ func (c *BookingController) CheckConflicts(ctx context.Context, userID string, s
 
 	return isConflict, nil
 
+}
+
+func (c *BookingController) AcceptBooking(ctx context.Context, id string) (*models.Booking, error) {
+	booking, err := c.Store.AcceptBooking(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return booking, nil
+}
+
+func (c *BookingController) EditBooking(ctx context.Context, booking models.Booking) (models.Booking, error) {
+	updatedBooking, err := c.Store.EditBooking(ctx, booking)
+
+	if err != nil {
+		return updatedBooking, err
+	}
+
+	return updatedBooking, nil
 }

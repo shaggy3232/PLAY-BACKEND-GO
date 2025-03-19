@@ -66,6 +66,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 
 	// Bookings routes
 	r.HandleFunc("/bookings", api.HandleCreateBooking).Methods("POST")
+	r.HandleFunc("/bookings", api.HandleEditBookings).Methods("PUT")
 	r.HandleFunc("/bookings/{bookingID}", api.HandleGetBookingById).Methods("GET")
 	r.HandleFunc("/bookings", api.HandleListBookings).Methods("GET")
 	r.HandleFunc("/bookings/{bookingID}", api.HandleDeleteBooking).Methods("DELETE")

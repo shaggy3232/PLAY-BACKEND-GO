@@ -31,8 +31,8 @@ CREATE TABLE bookings (
     location VARCHAR(100) NOT NULL,
     accepted BOOL NOT NULL,
     cancelled BOOL NOT NULL,
-    last_updated TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
+    last_updated TIMESTAMPTZ default NOW(),
+    created_at TIMESTAMPTZ default NOW()
 );
 -- +goose StatementEnd
 -- +goose Down

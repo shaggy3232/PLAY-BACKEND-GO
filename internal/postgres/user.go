@@ -117,7 +117,7 @@ func (c *Client) GetAvailalbleUsers(ctx context.Context, start time.Time, end ti
 	start = start.UTC()
 	end = end.UTC()
 
-	rows, err := c.pool.Query(ctx, "SELECT * FROM users u WHERE u.id IN (SELECT a.user_id FROM availabilities a WHERE a.start_time <= $1 AND a.end_time >= $2)", start, end)
+	rows, err := c.pool.Query(ctx, "SELECT DISTINCT u.* FROM users u JOIN availabilities a ON u.id = a.user_id WHERE a.start_time <= $1 AND a.end_time >= $2 AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.referee_id = u.id AND b.accepted = true AND (b.start_time <= $2 OR b.end_time >= $1))", start, end)
 
 	if err != nil {
 		return nil, err
