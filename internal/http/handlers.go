@@ -531,3 +531,24 @@ func (api *APIServer) HandleGetUsersAvailability(w http.ResponseWriter, r *http.
 	}
 
 }
+
+func (api *APIServer) handleUpdateAvailability(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+	avail, err := decode[models.Availability](r)
+
+	if err != nil {
+		log.Error().Err(err).Msg("Could not decode request into avaialbility")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "invalid availability schema"})
+
+	}
+	updatedAvail, err := api.AvailabilityController.UpdateAvailability(r.Context(), avail)
+	if err != nil {
+		log.Error().Err(err).Msg("could not update the availability")
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "could not update the availability"})
+
+	}
+
+	if err := encode(w, r, http.StatusOK, updatedAvail); err != nil {
+		log.Error().Err(err).Msg("could not encould updated availability into JSON")
+	}
+}

@@ -59,6 +59,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 
 	// Availability routes
 	r.HandleFunc("/availabilities", api.HandleCreateAvailability).Methods("POST")
+	r.HandleFunc("/availabilities", api.handleUpdateAvailability).Methods("PUT")
 	r.HandleFunc("/availabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE")
 	r.HandleFunc("/availabilities/{availabilityID}", api.HandleGetAvailabilityById).Methods("GET")
 	r.HandleFunc("/availabilities/{userID}", api.HandleGetUsersAvailability).Methods("GET")

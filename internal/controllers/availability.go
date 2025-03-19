@@ -13,7 +13,7 @@ type AvailabilityRepository interface {
 	GetAvailabilityById(ctx context.Context, id string) (*models.Availability, error)
 	// TODO: GetFilteredAvailability()
 	GetAvailabilityByUser(ctx context.Context, userId string) ([]models.Availability, error)
-
+	UpdateAvailability(ctx context.Context, avaialbility models.Availability) (*models.Availability, error)
 	DeleteAvailability(ctx context.Context, id string) (*models.Availability, error)
 }
 
@@ -68,4 +68,12 @@ func (c *AvailabilityController) GetAvailabilityByUser(ctx context.Context, id s
 	}
 
 	return userAvailability, nil
+}
+
+func (c *AvailabilityController) UpdateAvailability(ctx context.Context, availability models.Availability) (*models.Availability, error) {
+	updatedAvail, err := c.Store.UpdateAvailability(ctx, availability)
+	if err != nil {
+		return nil, err
+	}
+	return updatedAvail, nil
 }

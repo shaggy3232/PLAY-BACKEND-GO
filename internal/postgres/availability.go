@@ -96,14 +96,16 @@ func (c *Client) GetAvailabilityByUser(ctx context.Context, userID string) ([]mo
 	return availabilities, nil
 }
 
-func (c *Client) UpdateAvailability(ctx context.Context, updatedAvail models.Availability) (*models.Availability, error) {
+func (c *Client) UpdateAvailability(ctx context.Context, avaialbility models.Availability) (*models.Availability, error) {
+	var updatedAvialID uuid.UUID
+	var updatedAvail models.Availability
 
-	_, err := c.pool.Exec(ctx, "UPDATE availabilities SET price, start_time, end_time", updatedAvail.Price, updatedAvail.Start, updatedAvail.End)
+	err := c.pool.QueryRow(ctx, "UPDATE availabilities SET price = $1, start_time = $2, end_time = $3 WHERE id = $4 RETURNING id, user_id, price, start_time, end_time, created_at", avaialbility.Price, avaialbility.Start, avaialbility.End, avaialbility.ID).Scan(&updatedAvialID, &updatedAvail.UserID, &updatedAvail.Price, &updatedAvail.Start, &updatedAvail.Start, &updatedAvail.End)
 
 	if err != nil {
 		return nil, err
 	}
-
+	updatedAvail.ID = updatedAvialID.String()
 	return &updatedAvail, nil
 
 }
