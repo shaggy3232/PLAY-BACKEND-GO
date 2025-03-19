@@ -80,8 +80,19 @@ func (c *Client) CheckConflicts(ctx context.Context, userID string, start time.T
 }
 
 func (c *Client) AcceptBooking(ctx context.Context, id string) (*models.Booking, error) {
+	var booking models.Booking
+	var bookingID uuid.UUID
 
-	return nil, nil
+	err := c.pool.QueryRow(ctx, "UPDATE bookings SET accepted = $1 WHERE id = $2 RETURNING id, referee_id, organizer_id, price, start_time, end_time, location, accepted, cancelled, last_updated, created_at", true, id).Scan(&bookingID, &booking.RefereeID, &booking.OrganizerID, &booking.Price, &booking.Start, &booking.End, &booking.Location, &booking.Accepted, &booking.Cancelled, &booking.LastUpdated, &booking.CreatedAt)
+	if err != nil {
+		return &booking, err
+	}
+	booking.ID = bookingID.String()
+
+	///TODO: Adjust the availability for that referee so that they are no longer available durign hte time of the booking
+
+	return &booking, nil
+
 }
 
 func (c *Client) EditBooking(ctx context.Context, booking models.Booking) (models.Booking, error) {

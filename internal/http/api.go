@@ -59,7 +59,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 
 	// Availability routes
 	r.HandleFunc("/availabilities", api.HandleCreateAvailability).Methods("POST")
-	r.HandleFunc("/avialabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE")
+	r.HandleFunc("/availabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE")
 	r.HandleFunc("/availabilities/{availabilityID}", api.HandleGetAvailabilityById).Methods("GET")
 	r.HandleFunc("/availabilities/{userID}", api.HandleGetUsersAvailability).Methods("GET")
 	r.HandleFunc("/availabilities", api.HandleListAvailabilities).Methods("GET")
@@ -67,6 +67,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	// Bookings routes
 	r.HandleFunc("/bookings", api.HandleCreateBooking).Methods("POST")
 	r.HandleFunc("/bookings", api.HandleEditBookings).Methods("PUT")
+	r.HandleFunc("/bookings/{bookingID}", api.handleAcceptBooking).Methods("PUT")
 	r.HandleFunc("/bookings/{bookingID}", api.HandleGetBookingById).Methods("GET")
 	r.HandleFunc("/bookings", api.HandleListBookings).Methods("GET")
 	r.HandleFunc("/bookings/{bookingID}", api.HandleDeleteBooking).Methods("DELETE")

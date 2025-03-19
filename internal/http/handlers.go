@@ -291,7 +291,7 @@ func (api *APIServer) HandleListBookings(w http.ResponseWriter, r *http.Request)
 func (api *APIServer) HandleGetBookingById(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
 	vars := mux.Vars(r)
-	userId, ok := vars["userID"]
+	bookingID, ok := vars["bookingID"]
 	if !ok {
 		log.Error().
 			Msg("failed to get id from request")
@@ -299,7 +299,7 @@ func (api *APIServer) HandleGetBookingById(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	user, err := api.BookingController.GetBookingById(r.Context(), userId)
+	user, err := api.BookingController.GetBookingById(r.Context(), bookingID)
 	if err != nil {
 		// TODO: distinguish between missing bookings and actual errors
 		log.Error().
@@ -320,7 +320,7 @@ func (api *APIServer) HandleGetBookingById(w http.ResponseWriter, r *http.Reques
 func (api *APIServer) HandleDeleteBooking(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
 	vars := mux.Vars(r)
-	userId, ok := vars["userID"]
+	bookingID, ok := vars["bookingID"]
 	if !ok {
 		log.Error().
 			Msg("failed to get id from request")
@@ -328,7 +328,7 @@ func (api *APIServer) HandleDeleteBooking(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	deletedBooking, err := api.BookingController.DeleteBooking(r.Context(), userId)
+	deletedBooking, err := api.BookingController.DeleteBooking(r.Context(), bookingID)
 	if err != nil {
 		// TODO: distinguish between missing users and actual errors
 		log.Error().
@@ -363,6 +363,33 @@ func (api *APIServer) HandleEditBookings(w http.ResponseWriter, r *http.Request)
 
 	if err := encode(w, r, http.StatusOK, updatedBooking); err != nil {
 		log.Error().Err(err).Msg("failed to create Json response with the updated booking")
+	}
+
+}
+
+func (api *APIServer) handleAcceptBooking(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+	vars := mux.Vars(r)
+	bookingID, ok := vars["bookingID"]
+	if !ok {
+		log.Error().Msg("failed to get booking id from request")
+		encode(w, r, http.StatusBadRequest, &APIError{
+			Message: "COULD NOT FIND BOOKING ID IN THE REQUEST",
+		})
+	}
+
+	booking, err := api.BookingController.AcceptBooking(r.Context(), bookingID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to accept booking")
+		encode(w, r, http.StatusInternalServerError, &APIError{
+			Message: "COULD NOT ACCEPT BOOKING",
+		})
+		return
+	}
+
+	if err := encode(w, r, http.StatusOK, booking); err != nil {
+		log.Error().Err(err).Msg("could not encode booking into json")
+		return
 	}
 
 }
