@@ -97,8 +97,9 @@ func (c *Client) AcceptBooking(ctx context.Context, id string) (*models.Booking,
 
 func (c *Client) EditBooking(ctx context.Context, booking models.Booking) (models.Booking, error) {
 	var updatedBooking models.Booking
+	var updatedBookingID uuid.UUID
 
-	err := c.pool.QueryRow(ctx, "UPDATE bookings SET referee_id = $1, organizer_id = $2, price = $3, start_time = $4, end_time = $5, location = $6, accepted = $7, cancelled = $8, last_updated = $9 WHERE id = $10 RETURNING *", booking.RefereeID, booking.OrganizerID, booking.Price, booking.Start, booking.End, booking.Location, booking.Accepted, booking.Cancelled, booking.CreatedAt, time.Now(), booking.ID).Scan(updatedBooking)
+	err := c.pool.QueryRow(ctx, "UPDATE bookings SET  referee_id = $2, organizer_id = $3, price = $4, start_time = $5, end_time = $6, location = $7, accepted = $8, cancelled = $9, last_updated = $10 WHERE id = $1 RETURNING id, referee_id, organizer_id, price, start_time, end_time, location, accepted, cancelled, last_updated, created_at", booking.ID, booking.RefereeID, booking.OrganizerID, booking.Price, booking.Start, booking.End, booking.Location, booking.Accepted, booking.Cancelled, time.Now()).Scan(&updatedBookingID, &updatedBooking.RefereeID, &updatedBooking.OrganizerID, &updatedBooking.Price, &updatedBooking.Start, &updatedBooking.End, &updatedBooking.Location, &updatedBooking.Accepted, &updatedBooking.Cancelled, &updatedBooking.LastUpdated, &updatedBooking.CreatedAt)
 	if err != nil {
 		return updatedBooking, err
 	}
