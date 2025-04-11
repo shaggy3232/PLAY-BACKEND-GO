@@ -42,6 +42,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	// middleware
 	r.Use(middleware.NewPanicMiddleware())
 	r.Use(middleware.NewLoggingMiddleware())
+	r.Use(middleware.CORSMiddleware())
 
 	//Login Routes
 	r.HandleFunc("/login", api.HandleUserLogin).Methods("POST")
@@ -50,7 +51,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	protectedRoutes.Use(middleware.JWTMiddleware)
 
 	// User routes
-	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST")
+	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST", "OPTIONS")
 	r.HandleFunc("/users", api.HandleUpdateUser).Methods("PUT")
 	protectedRoutes.HandleFunc("/users/{userID}/", api.HandleGetUserById).Methods("GET")
 	r.HandleFunc("/users", api.HandleListUsers).Methods("GET")

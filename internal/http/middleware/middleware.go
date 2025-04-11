@@ -87,3 +87,28 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+// NewCORSMiddleware adds CORS headers and handles OPTIONS preflight requests
+func CORSMiddleware() func(http.Handler) http.Handler {
+	log := zerolog.Ctx(context.Background())
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			// Set CORS headers
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+			// Handle preflight request
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+
+			// Call the next handler
+			next.ServeHTTP(w, r)
+			log.Println("CORS middleware triggered for", r.Method, r.URL.Path)
+		}
+
+		return http.HandlerFunc(fn)
+	}
+}
