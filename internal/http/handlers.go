@@ -31,6 +31,26 @@ func (api *APIServer) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "internal server error"})
 		return
 	}
+	//create a token and assign it in the response as a cookie
+	token, err := auth.GenerateJWT(newUser.ID)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Could not generate a token")
+
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "Could not generate Token"})
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(1 * time.Hour),
+		Path:     "/",
+	})
 
 	if err := encode(w, r, http.StatusOK, newUser); err != nil {
 		log.Error().

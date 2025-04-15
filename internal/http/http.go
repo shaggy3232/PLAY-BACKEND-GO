@@ -18,10 +18,7 @@ type Claims struct {
 
 // encode encodes the response and writes it
 func encode[T any](w http.ResponseWriter, r *http.Request, status int, v T) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*") // or "*" for all
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	w.WriteHeader(status)
 
 	if err := json.NewEncoder(w).Encode(v); err != nil {
