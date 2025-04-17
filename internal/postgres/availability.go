@@ -71,12 +71,17 @@ func (c *Client) GetAvailabilityById(ctx context.Context, id string) (*models.Av
 }
 
 func (c *Client) GetAvailabilityByUser(ctx context.Context, userID string) ([]models.Availability, error) {
+	log := zerolog.Ctx(ctx)
 	var availabilities []models.Availability
 
 	rows, err := c.pool.Query(ctx, "SELECT * FROM availabilities WHERE user_id = $1", userID)
 
 	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to get get rows for data base")
 		return nil, err
+
 	}
 
 	for rows.Next() {
@@ -84,7 +89,10 @@ func (c *Client) GetAvailabilityByUser(ctx context.Context, userID string) ([]mo
 		var availID uuid.UUID
 		var userID uuid.UUID
 
-		if err := rows.Scan(&availID, &userID, &avail.Price, &avail.Start, &avail.End); err != nil {
+		if err := rows.Scan(&availID, &userID, &avail.Price, &avail.Start, &avail.End, &avail.CreatedAt); err != nil {
+			log.Error().
+				Err(err).
+				Msg("failed to scan row from query")
 			return nil, err
 		}
 

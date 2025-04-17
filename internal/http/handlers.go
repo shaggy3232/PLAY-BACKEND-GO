@@ -542,7 +542,7 @@ func (api *APIServer) HandleGetUsersAvailability(w http.ResponseWriter, r *http.
 	userAvailability, err := api.AvailabilityController.GetAvailabilityByUser(r.Context(), userID)
 	if err != nil {
 		log.Error().
-			Msg("Failed to get availability for the database")
+			Msg("Failed to get availability from the database")
 		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get availabilities"})
 		return
 	}
