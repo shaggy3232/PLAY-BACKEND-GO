@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
 
@@ -105,4 +106,72 @@ func (c *Client) EditBooking(ctx context.Context, booking models.Booking) (model
 	}
 
 	return updatedBooking, nil
+}
+
+func (c *Client) GetBookingsByRef(ctx context.Context, id string) ([]models.Booking, error) {
+	log := zerolog.Ctx(ctx)
+	var bookings []models.Booking
+
+	rows, err := c.pool.Query(ctx, "SELECT * FROM bookings WHERE referee_id = $1", id)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to get get rows for data base")
+		return nil, err
+
+	}
+	for rows.Next() {
+		var booking models.Booking
+		var bookingID uuid.UUID
+		var refereeID uuid.UUID
+		var userID uuid.UUID
+
+		if err := rows.Scan(&bookingID, &refereeID, &userID, &booking.Price, &booking.Start, &booking.End, &booking.Location, &booking.Accepted, &booking.Cancelled, &booking.LastUpdated, &booking.CreatedAt); err != nil {
+			log.Error().
+				Err(err).
+				Msg("failed to scan row from query")
+			return nil, err
+		}
+
+		booking.ID = bookingID.String()
+		booking.RefereeID = refereeID.String()
+		booking.OrganizerID = userID.String()
+		bookings = append(bookings, booking)
+	}
+	return bookings, nil
+
+}
+
+func (c *Client) GetBookingsByUser(ctx context.Context, id string) ([]models.Booking, error) {
+	log := zerolog.Ctx(ctx)
+	var bookings []models.Booking
+
+	rows, err := c.pool.Query(ctx, "SELECT * FROM bookings WHERE organizer_id = $1", id)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to get get rows for data base")
+		return nil, err
+
+	}
+	for rows.Next() {
+		var booking models.Booking
+		var bookingID uuid.UUID
+		var refereeID uuid.UUID
+		var userID uuid.UUID
+
+		if err := rows.Scan(&bookingID, &refereeID, &userID, &booking.Price, &booking.Start, &booking.End, &booking.Location, &booking.Accepted, &booking.Cancelled, &booking.LastUpdated, &booking.CreatedAt); err != nil {
+			log.Error().
+				Err(err).
+				Msg("failed to scan row from query")
+			return nil, err
+		}
+
+		booking.ID = bookingID.String()
+		booking.RefereeID = refereeID.String()
+		booking.OrganizerID = userID.String()
+		bookings = append(bookings, booking)
+	}
+	return bookings, nil
+
 }

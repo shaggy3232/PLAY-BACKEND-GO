@@ -13,6 +13,8 @@ type BookingRepository interface {
 	GetBookings(ctx context.Context) ([]models.Booking, error)
 	GetBookingById(ctx context.Context, id string) (*models.Booking, error)
 	// TODO: GetFilteredBooking()
+	GetBookingsByRef(ctx context.Context, id string) ([]models.Booking, error)
+	GetBookingsByUser(ctx context.Context, id string) ([]models.Booking, error)
 	CheckConflicts(ctx context.Context, userID string, start time.Time, end time.Time) (bool, error)
 	DeleteBooking(ctx context.Context, id string) (*models.Booking, error)
 	AcceptBooking(ctx context.Context, id string) (*models.Booking, error)
@@ -90,4 +92,25 @@ func (c *BookingController) EditBooking(ctx context.Context, booking models.Book
 	}
 
 	return updatedBooking, nil
+}
+
+func (c *BookingController) GetBookingsByRef(ctx context.Context, id string) ([]models.Booking, error) {
+	Bookings, err := c.Store.GetBookingsByRef(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return Bookings, nil
+
+}
+
+func (c *BookingController) GetBookingsByUser(ctx context.Context, id string) ([]models.Booking, error) {
+	Bookings, err := c.Store.GetBookingsByUser(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return Bookings, nil
 }

@@ -337,6 +337,45 @@ func (api *APIServer) HandleGetBookingById(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+func (api *APIServer) HandleGetBookingByRef(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+	vars := mux.Vars(r)
+	refereeID, ok := vars["refereeID"]
+	if !ok {
+		log.Error().
+			Msg("failed to get id from request")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing user id in request"})
+		return
+	}
+	bookings, err := api.BookingController.GetBookingsByRef(r.Context(), refereeID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get referee's Booking")
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "Failed to get referee's Bookings"})
+	}
+	if err := encode(w, r, http.StatusOK, bookings); err != nil {
+		log.Error().Err(err).Msg("failed encodeing bookings to json response")
+	}
+}
+func (api *APIServer) HandleGetBookingByUser(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+	vars := mux.Vars(r)
+	userID, ok := vars["userID"]
+	if !ok {
+		log.Error().
+			Msg("failed to get id from request")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing user id in request"})
+		return
+	}
+	bookings, err := api.BookingController.GetBookingsByUser(r.Context(), userID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get referee's Booking")
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "Failed to get referee's Bookings"})
+	}
+	if err := encode(w, r, http.StatusOK, bookings); err != nil {
+		log.Error().Err(err).Msg("failed encodeing bookings to json response")
+	}
+}
+
 func (api *APIServer) HandleDeleteBooking(w http.ResponseWriter, r *http.Request) {
 	log := zerolog.Ctx(r.Context())
 	vars := mux.Vars(r)
