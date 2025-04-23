@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
 )
@@ -15,6 +16,7 @@ type AvailabilityRepository interface {
 	GetAvailabilityByUser(ctx context.Context, userId string) ([]models.Availability, error)
 	UpdateAvailability(ctx context.Context, avaialbility models.Availability) (*models.Availability, error)
 	DeleteAvailability(ctx context.Context, id string) (*models.Availability, error)
+	GetValidAvailabilities(ctx context.Context, start time.Time, end time.Time) ([]models.Availability, error)
 }
 
 type AvailabilityController struct {
@@ -76,4 +78,13 @@ func (c *AvailabilityController) UpdateAvailability(ctx context.Context, availab
 		return nil, err
 	}
 	return updatedAvail, nil
+}
+
+func (c *AvailabilityController) GetValidAvailabilities(ctx context.Context, start time.Time, end time.Time) ([]models.Availability, error) {
+	availabilities, err := c.Store.GetValidAvailabilities(ctx, start, end)
+
+	if err != nil {
+		return nil, err
+	}
+	return availabilities, nil
 }

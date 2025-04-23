@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -136,4 +137,40 @@ func (c *Client) DeleteAvailability(ctx context.Context, id string) (*models.Ava
 	}
 
 	return &avail, nil
+}
+
+func (c *Client) GetValidAvailabilities(ctx context.Context, start time.Time, end time.Time) ([]models.Availability, error) {
+	log := zerolog.Ctx(ctx)
+	var availabilities []models.Availability
+
+	rows, err := c.pool.Query(ctx, `
+		SELECT * FROM availabilities
+		WHERE start_time >= $1 AND end_time <= $2
+	`, start, end)
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to get availabilities within time range")
+		return nil, err
+	}
+
+	for rows.Next() {
+		var avail models.Availability
+		var availID uuid.UUID
+		var userID uuid.UUID
+
+		if err := rows.Scan(&availID, &userID, &avail.Price, &avail.Start, &avail.End, &avail.CreatedAt); err != nil {
+			log.Error().
+				Err(err).
+				Msg("failed to scan availability row")
+			return nil, err
+		}
+
+		avail.ID = availID.String()
+		avail.UserID = userID.String()
+		availabilities = append(availabilities, avail)
+	}
+
+	return availabilities, nil
 }

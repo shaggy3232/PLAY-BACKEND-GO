@@ -55,7 +55,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	r.HandleFunc("/users", api.HandleUpdateUser).Methods("PUT")
 	protectedRoutes.HandleFunc("/users/{userID}/", api.HandleGetUserById).Methods("GET")
 	r.HandleFunc("/users", api.HandleListUsers).Methods("GET")
-	r.HandleFunc("/users/{start}/{end}", api.HandleGetAvailableUsers)
+	r.HandleFunc("/users/{start}/{end}", api.HandleGetAvailableUsers).Methods("GET", "OPTIONS")
 	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE")
 
 	// Availability routes
@@ -64,6 +64,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	r.HandleFunc("/availabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE", "OPTIONS")
 	r.HandleFunc("/availabilities/{availabilityID}", api.HandleGetAvailabilityById).Methods("GET", "OPTIONS")
 	r.HandleFunc("/availabilities/user/{userID}", api.HandleGetUsersAvailability).Methods("GET", "OPTIONS")
+	r.HandleFunc("/availabilities/{start}/{end}", api.HandleGetValidAvailabilities).Methods("GET", "OPTIONS")
 	r.HandleFunc("/availabilities", api.HandleListAvailabilities).Methods("GET")
 
 	// Bookings routes

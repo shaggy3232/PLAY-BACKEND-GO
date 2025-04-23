@@ -453,6 +453,48 @@ func (api *APIServer) handleAcceptBooking(w http.ResponseWriter, r *http.Request
 
 }
 
+func (api *APIServer) HandleGetValidAvailabilities(w http.ResponseWriter, r *http.Request) {
+	log := zerolog.Ctx(r.Context())
+	vars := mux.Vars(r)
+	startString, ok := vars["start"]
+
+	if !ok {
+		log.Error().Msg("Failed to get startTime from request")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing start time in request"})
+	}
+
+	endString, ok := vars["end"]
+
+	if !ok {
+		log.Error().Msg("Failed to get end time from the request")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "missing end time in request"})
+		return
+	}
+	start, err := time.Parse(time.RFC3339, startString)
+	if err != nil {
+		log.Error().Msg("Failed to parse start time in to time.Time")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "bad start time format"})
+		return
+	}
+	end, err := time.Parse(time.RFC3339, endString)
+	if err != nil {
+		log.Error().Msg("failed to parse end time in to time.Time")
+		encode(w, r, http.StatusBadRequest, &APIError{Message: "bad end time format"})
+		return
+	}
+
+	availabilities, err := api.AvailabilityController.GetValidAvailabilities(r.Context(), start, end)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to get valid Availabilities")
+		encode(w, r, http.StatusInternalServerError, &APIError{Message: "failed to get valid availabilites"})
+	}
+
+	if err := encode(w, r, http.StatusOK, availabilities); err != nil {
+		log.Error().Err(err).Msg("Failed to encode the available users json response")
+	}
+
+}
+
 //availability requests
 
 func (api *APIServer) HandleCreateAvailability(w http.ResponseWriter, r *http.Request) {
