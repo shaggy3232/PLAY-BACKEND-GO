@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/shaggy3232/PLAY-BACKEND-GO/internal/models"
@@ -114,9 +115,8 @@ func (c *Client) GetUserFromEmail(ctx context.Context, email string) (*models.Us
 func (c *Client) GetAvailalbleUsers(ctx context.Context, start time.Time, end time.Time) ([]models.User, error) {
 	var avaiableUsers []models.User
 	//convert the start and end time to UTC
-	start = start.UTC()
-	end = end.UTC()
-
+	log := zerolog.Ctx(ctx)
+	log.Debug().Msgf("Searching between: %s and %s", start, end)
 	rows, err := c.pool.Query(ctx, "SELECT DISTINCT u.* FROM users u JOIN availabilities a ON u.id = a.user_id WHERE a.start_time <= $1 AND a.end_time >= $2 AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.referee_id = u.id AND b.accepted = true AND (b.start_time <= $2 OR b.end_time >= $1))", start, end)
 
 	if err != nil {

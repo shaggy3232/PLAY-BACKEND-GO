@@ -145,7 +145,7 @@ func (c *Client) GetValidAvailabilities(ctx context.Context, start time.Time, en
 
 	rows, err := c.pool.Query(ctx, `
 		SELECT * FROM availabilities
-		WHERE start_time >= $1 AND end_time <= $2
+		WHERE start_time <= $1 AND end_time >= $2
 	`, start, end)
 
 	if err != nil {
