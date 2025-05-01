@@ -44,38 +44,37 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	r.Use(middleware.NewLoggingMiddleware())
 	r.Use(middleware.CORSMiddleware())
 
-	//Login Routes
-	r.HandleFunc("/login", api.HandleUserLogin).Methods("POST")
-
 	protectedRoutes := r.PathPrefix("/api").Subrouter()
 	protectedRoutes.Use(middleware.JWTMiddleware)
 
+	//Login Routes
+	r.HandleFunc("/login", api.HandleUserLogin).Methods("POST", "OPTIONS")
 	// User routes
 	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST", "OPTIONS")
-	r.HandleFunc("/users", api.HandleUpdateUser).Methods("PUT")
-	protectedRoutes.HandleFunc("/users/{userID}/", api.HandleGetUserById).Methods("GET")
-	r.HandleFunc("/users", api.HandleListUsers).Methods("GET")
+	r.HandleFunc("/users", api.HandleUpdateUser).Methods("PUT", "OPTIONS")
+	protectedRoutes.HandleFunc("/users/{userID}/", api.HandleGetUserById).Methods("GET", "OPTIONS")
+	r.HandleFunc("/users", api.HandleListUsers).Methods("GET", "OPTIONS")
 	r.HandleFunc("/users/{start}/{end}", api.HandleGetAvailableUsers).Methods("GET", "OPTIONS")
-	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE")
+	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE", "OPTIONS")
 
 	// Availability routes
 	r.HandleFunc("/availabilities", api.HandleCreateAvailability).Methods("POST", "OPTIONS")
-	r.HandleFunc("/availabilities", api.handleUpdateAvailability).Methods("PUT")
+	r.HandleFunc("/availabilities", api.handleUpdateAvailability).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/availabilities/{availabilityID}", api.HandleDeleteAvailability).Methods("DELETE", "OPTIONS")
 	r.HandleFunc("/availabilities/{availabilityID}", api.HandleGetAvailabilityById).Methods("GET", "OPTIONS")
 	r.HandleFunc("/availabilities/user/{userID}", api.HandleGetUsersAvailability).Methods("GET", "OPTIONS")
 	r.HandleFunc("/availabilities/{start}/{end}", api.HandleGetValidAvailabilities).Methods("GET", "OPTIONS")
-	r.HandleFunc("/availabilities", api.HandleListAvailabilities).Methods("GET")
+	r.HandleFunc("/availabilities", api.HandleListAvailabilities).Methods("GET", "OPTIONS")
 
 	// Bookings routes
-	r.HandleFunc("/bookings", api.HandleCreateBooking).Methods("POST")
-	r.HandleFunc("/bookings", api.HandleEditBookings).Methods("PUT")
-	r.HandleFunc("/bookings/{bookingID}", api.handleAcceptBooking).Methods("PUT")
-	r.HandleFunc("/bookings/{bookingID}", api.HandleGetBookingById).Methods("GET")
+	r.HandleFunc("/bookings", api.HandleCreateBooking).Methods("POST", "OPTIONS")
+	r.HandleFunc("/bookings", api.HandleEditBookings).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/bookings/{bookingID}", api.handleAcceptBooking).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/bookings/{bookingID}", api.HandleGetBookingById).Methods("GET", "OPTIONS")
 	r.HandleFunc("/bookings/referee/{refereeID}", api.HandleGetBookingByRef).Methods("GET", "OPTIONS")
 	r.HandleFunc("/bookings/user/{userID}", api.HandleGetBookingByUser).Methods("GET", "OPTIONS")
-	r.HandleFunc("/bookings", api.HandleListBookings).Methods("GET")
-	r.HandleFunc("/bookings/{bookingID}", api.HandleDeleteBooking).Methods("DELETE")
+	r.HandleFunc("/bookings", api.HandleListBookings).Methods("GET", "OPTIONS")
+	r.HandleFunc("/bookings/{bookingID}", api.HandleDeleteBooking).Methods("DELETE", "OPTIONS")
 
 	http.Handle("/users", r)
 

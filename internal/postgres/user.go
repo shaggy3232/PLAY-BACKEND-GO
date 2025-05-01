@@ -117,7 +117,10 @@ func (c *Client) GetAvailalbleUsers(ctx context.Context, start time.Time, end ti
 	//convert the start and end time to UTC
 	log := zerolog.Ctx(ctx)
 	log.Debug().Msgf("Searching between: %s and %s", start, end)
-	rows, err := c.pool.Query(ctx, "SELECT DISTINCT u.* FROM users u JOIN availabilities a ON u.id = a.user_id WHERE a.start_time <= $1 AND a.end_time >= $2 AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.referee_id = u.id AND b.accepted = true AND (b.start_time <= $2 OR b.end_time >= $1))", start, end)
+
+	// TO:DO: debug this part of the request
+	// AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.referee_id = u.id AND b.accepted = true AND (b.start_time <= $2 OR b.end_time >= $1))
+	rows, err := c.pool.Query(ctx, "SELECT DISTINCT u.* FROM users u JOIN availabilities a ON u.id = a.user_id WHERE a.start_time <= $1 AND a.end_time >= $2", start, end)
 
 	if err != nil {
 		return nil, err

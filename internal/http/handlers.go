@@ -210,12 +210,18 @@ func (api *APIServer) HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
-		HttpOnly: true,                    // Prevents JavaScript access (protects against XSS)
-		Secure:   true,                    // Requires HTTPS
-		SameSite: http.SameSiteStrictMode, // Prevents CSRF
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(1 * time.Hour),
+		Path:     "/",
 	})
-	w.WriteHeader(http.StatusOK)
+
+	if err := encode(w, r, http.StatusOK, user); err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to encode CreateUser json response")
+	}
 
 }
 
@@ -273,6 +279,7 @@ func (api *APIServer) HandleCreateBooking(w http.ResponseWriter, r *http.Request
 	}
 
 	newBooking, err := api.BookingController.CreateBooking(r.Context(), &potentialBooking)
+
 	if err != nil {
 		log.Error().
 			Err(err).
