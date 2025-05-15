@@ -52,7 +52,7 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 	// User routes
 	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST", "OPTIONS")
 	r.HandleFunc("/users", api.HandleUpdateUser).Methods("PUT", "OPTIONS")
-	protectedRoutes.HandleFunc("/users/{userID}/", api.HandleGetUserById).Methods("GET", "OPTIONS")
+	r.HandleFunc("/users/{userID}", api.HandleGetUserById).Methods("GET", "OPTIONS")
 	r.HandleFunc("/users", api.HandleListUsers).Methods("GET", "OPTIONS")
 	r.HandleFunc("/users/{start}/{end}", api.HandleGetAvailableUsers).Methods("GET", "OPTIONS")
 	r.HandleFunc("/users/{userID}", api.HandleDeleteUser).Methods("DELETE", "OPTIONS")
