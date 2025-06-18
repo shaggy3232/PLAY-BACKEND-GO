@@ -22,3 +22,6 @@ compose:
 .PHONY: clean
 clean:
 	docker compose down
+
+build:
+	docker build -t play-backend-repo .

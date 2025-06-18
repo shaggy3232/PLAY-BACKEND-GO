@@ -52,13 +52,7 @@ func (a *App) Run(ctx context.Context) {
 	zerolog.DefaultContextLogger = &log
 
 	// TODO: Make config struct with env variable parsing
-	db, err := postgres.New(
-		ctx,
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_NAME"),
-	)
+	db, err := postgres.New(ctx)
 	if err != nil {
 		log.Fatal().
 			Err(err).
