@@ -49,6 +49,8 @@ func NewAPIServer(options ...APIServerOption) *APIServer {
 
 	//Login Routes
 	r.HandleFunc("/login", api.HandleUserLogin).Methods("POST", "OPTIONS")
+
+	r.HandleFunc("/me", api.HandleMe).Methods("GET", "OPTIONS")
 	// User routes
 	r.HandleFunc("/users", api.HandleCreateUser).Methods("POST", "OPTIONS")
 	r.HandleFunc("/users", api.HandleUpdateUser).Methods("PUT", "OPTIONS")

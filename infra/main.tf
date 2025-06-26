@@ -14,6 +14,34 @@ provider "aws" {
 }
 
 # ===================
+# ACM Certificate
+# ===================
+resource "aws_acm_certificate" "https" {
+  domain_name       = var.domain_name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# ===================
+# Route53 DNS Validation Record (Optional if using Route53)
+# ===================
+# resource "aws_route53_record" "cert_validation" {
+#   name    = aws_acm_certificate.https.domain_validation_options[0].resource_record_name
+#   type    = aws_acm_certificate.https.domain_validation_options[0].resource_record_type
+#   zone_id = var.route53_zone_id
+#   records = [aws_acm_certificate.https.domain_validation_options[0].resource_record_value]
+#   ttl     = 60
+# }
+
+# resource "aws_acm_certificate_validation" "cert" {
+#   certificate_arn         = aws_acm_certificate.https.arn
+#   validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
+# }
+
+# ===================
 # ECR Repository
 # ===================
 resource "aws_ecr_repository" "play-backend-repo" {
@@ -86,12 +114,19 @@ resource "aws_route_table_association" "public_2" {
 # ===================
 resource "aws_security_group" "ecs_sg" {
   name        = "play-ecs-sg"
-  description = "Allow HTTP access to ECS containers"
+  description = "Allow HTTP/HTTPS access to ECS containers"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -121,6 +156,57 @@ resource "aws_security_group" "rds_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# ===================
+# Application Load Balancer
+# ===================
+resource "aws_lb" "app_alb" {
+  name               = "play-app-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.ecs_sg.id]
+  subnets            = [aws_subnet.public_1.id, aws_subnet.public_2.id]
+}
+
+resource "aws_lb_target_group" "app_tg" {
+  name     = "play-app-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+  target_type = "ip"
+  health_check {
+    path     = "/"
+    protocol = "HTTP"
+  }
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.app_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.app_alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.https.arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app_tg.arn
   }
 }
 
@@ -174,10 +260,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
-resource "aws_cloudwatch_log_group" "ecs_log_group" {
-  name              = "/ecs/play"
-  retention_in_days = 7
-}
+
 resource "aws_ecs_task_definition" "play_task" {
   family                   = "play-task"
   network_mode             = "awsvpc"
@@ -206,17 +289,9 @@ resource "aws_ecs_task_definition" "play_task" {
       secrets = [
         {
           name      = "DATABASE_URL"
-          valueFrom = aws_secretsmanager_secret_version.db_credentials_version.arn
+          valueFrom = aws_secretsmanager_secret.db_credentials.arn
         }
       ]
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-group         = "/ecs/play"
-          awslogs-region        = "ca-central-1"
-          awslogs-stream-prefix = "ecs"
-        }
-      }
     }
   ])
 }
@@ -233,7 +308,14 @@ resource "aws_ecs_service" "play_service" {
     assign_public_ip = true
     security_groups  = [aws_security_group.ecs_sg.id]
   }
-  depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role_policy]
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app_tg.arn
+    container_name   = "play-backend"
+    container_port   = 8080
+  }
+
+  depends_on = [aws_lb_listener.https]
 }
 
 # ===================

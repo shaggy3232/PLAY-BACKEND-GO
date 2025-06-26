@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"os"
 	"time"
 
@@ -31,4 +32,20 @@ func GenerateJWT(userID string) (string, error) {
 
 	// Sign the token with the secret key
 	return token.SignedString([]byte(os.Getenv("jwtSecret")))
+}
+
+func GetUserIDFromToken(tokenStr string) (string, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("jwtSecret")), nil
+	})
+	if err != nil || !token.Valid {
+		return "", errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(*Claims)
+	if !ok {
+		return "", errors.New("invalid claims structure")
+	}
+
+	return claims.UserID, nil
 }
