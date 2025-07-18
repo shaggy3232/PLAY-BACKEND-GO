@@ -1,4 +1,2 @@
-db_username = "postgres"
-db_password = "postgres123"
-domain_name = "yourdomain.com"
-route53_zone_id = "Z123456ABCDEFG"
+
+database_url = "postgresql://neondb_owner:npg_YWrh7NkmXg0V@ep-royal-haze-ae4o075h-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"

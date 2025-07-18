@@ -1,13 +1,10 @@
 #!/bin/sh
 set -e
 
-# Extract DATABASE_URL from JSON (injected by ECS secret)
-export DATABASE_URL=$(echo $DATABASE_URL | jq -r '.DATABASE_URL')
-
-# Run DB migrations
+# No jq needed if it's just a raw string
 echo "Running Goose migrations..."
+echo $DATABASE_URL
 goose -dir /migrations postgres "$DATABASE_URL" up
 
-# Start the backend server
 echo "Starting Go backend..."
 exec /app/playgobackend
