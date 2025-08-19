@@ -1,0 +1,6 @@
+# flyctl launch added from .gitignore
+**/.vscode/*
+**/.DS_Store
+cmd/main/env.go
+infra/.terraform
+fly.toml
