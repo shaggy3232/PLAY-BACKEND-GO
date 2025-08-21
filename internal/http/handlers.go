@@ -46,8 +46,8 @@ func (api *APIServer) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		Name:     "token",
 		Value:    token,
 		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 		Expires:  time.Now().Add(1 * time.Hour),
 		Path:     "/",
 	})
@@ -174,11 +174,13 @@ func (api *APIServer) HandleMe(w http.ResponseWriter, r *http.Request) {
 			Msg("Failed to get token from cookie")
 	}
 	userId, err := auth.GetUserIDFromToken(cookie.Value)
+
 	if err != nil {
 		log.Error().
 			Err(err).
 			Msg("Couldn't get userId from token")
 	}
+
 	if err := encode(w, r, http.StatusOK, userId); err != nil {
 		log.Error().
 			Err(err).
