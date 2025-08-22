@@ -45,6 +45,7 @@ func (api *APIServer) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
+		Domain:   "play-go-api.fly.dev",
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
@@ -233,6 +234,7 @@ func (api *APIServer) HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
+		Domain:   "play-go-api.fly.dev",
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
